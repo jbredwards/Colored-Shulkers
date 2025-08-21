@@ -1,0 +1,24 @@
+{
+    "forge_marker": 1,
+    "defaults": {
+        "transform": "forge:default-item",
+        "model": "builtin/generated"
+    },
+    "variants": {
+        "black": [{"textures": {"layer0": "colored_shulkers:items/shulker_shell_black"}}],
+        "red": [{"textures": {"layer0": "colored_shulkers:items/shulker_shell_red"}}],
+        "green": [{"textures": {"layer0": "colored_shulkers:items/shulker_shell_green"}}],
+        "brown": [{"textures": {"layer0": "colored_shulkers:items/shulker_shell_brown"}}],
+        "blue": [{"textures": {"layer0": "colored_shulkers:items/shulker_shell_blue"}}],
+        "cyan": [{"textures": {"layer0": "colored_shulkers:items/shulker_shell_cyan"}}],
+        "silver": [{"textures": {"layer0": "colored_shulkers:items/shulker_shell_silver"}}],
+        "gray": [{"textures": {"layer0": "colored_shulkers:items/shulker_shell_gray"}}],
+        "pink": [{"textures": {"layer0": "colored_shulkers:items/shulker_shell_pink"}}],
+        "lime": [{"textures": {"layer0": "colored_shulkers:items/shulker_shell_lime"}}],
+        "yellow": [{"textures": {"layer0": "colored_shulkers:items/shulker_shell_yellow"}}],
+        "light_blue": [{"textures": {"layer0": "colored_shulkers:items/shulker_shell_light_blue"}}],
+        "magenta": [{"textures": {"layer0": "colored_shulkers:items/shulker_shell_magenta"}}],
+        "orange": [{"textures": {"layer0": "colored_shulkers:items/shulker_shell_orange"}}],
+        "white": [{"textures": {"layer0": "colored_shulkers:items/shulker_shell_white"}}]
+    }
+}

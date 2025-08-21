@@ -1,0 +1,115 @@
+package git.jbredwards.colored_shulkers;
+
+import git.jbredwards.colored_shulkers.compat.QuarkHandler;
+import git.jbredwards.colored_shulkers.registry.ItemColoredShell;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.monster.EntityShulker;
+import net.minecraft.init.Items;
+import net.minecraft.item.EnumDyeColor;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.WeightedRandom;
+import net.minecraft.world.storage.loot.*;
+import net.minecraft.world.storage.loot.conditions.LootCondition;
+import net.minecraft.world.storage.loot.functions.LootFunction;
+import net.minecraftforge.event.LootTableLoadEvent;
+import net.minecraftforge.event.entity.living.LivingSpawnEvent;
+import net.minecraftforge.event.entity.player.ItemTooltipEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import org.apache.commons.lang3.ArrayUtils;
+import vazkii.quark.api.capability.IEnchantColorProvider;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.*;
+import java.util.function.Function;
+
+/**
+ *
+ * @author jbred
+ *
+ */
+@Mod.EventBusSubscriber(modid = Tags.MOD_ID)
+public final class ShulkerEvents
+{
+    @SubscribeEvent(priority = EventPriority.LOW)
+    static void dropColoredShulkerShells(@Nonnull final LootTableLoadEvent event) {
+        if(LootTableList.ENTITIES_SHULKER.equals(event.getName())) {
+            ObfuscationReflectionHelper.<List<LootPool>, LootTable>getPrivateValue(LootTable.class, event.getTable(), "field_186466_c").forEach(pool -> {
+                ObfuscationReflectionHelper.<List<LootEntry>, LootPool>getPrivateValue(LootPool.class, pool, "field_186453_a").forEach(entry -> {
+                    if(entry instanceof LootEntryItem && ((LootEntryItem)entry).item == Items.SHULKER_SHELL) {
+                        ((LootEntryItem)entry).functions = ArrayUtils.add(((LootEntryItem)entry).functions, new LootFunction(new LootCondition[0]) {
+                            @Nonnull
+                            @Override
+                            public ItemStack apply(@Nonnull final ItemStack stack, @Nonnull final Random rand, @Nonnull final LootContext context) {
+                                if(ColoredShulkers.Cfg.enableDrops && stack.getItem() == Items.SHULKER_SHELL && context.getLootedEntity() instanceof EntityShulker) {
+                                    @Nonnull final EnumDyeColor color = ShulkerUtils.getColor((EntityShulker)context.getLootedEntity());
+                                    if(color != EnumDyeColor.PURPLE) return ItemColoredShell.create(color, stack.getCount());
+                                }
+
+                                return stack;
+                            }
+                        });
+                    }
+                });
+            });
+        }
+    }
+
+    @SubscribeEvent
+    static void shulkerDying(@Nonnull final PlayerInteractEvent.EntityInteract event) {
+        if(event.getTarget() instanceof EntityShulker) {
+            @Nonnull final ItemStack held = event.getItemStack();
+            if(!held.isEmpty() && SHELL_COLOR_GETTER.containsKey(held.getItem())) {
+                @Nonnull final EnumDyeColor shulkerColor = ShulkerUtils.getColor((EntityShulker)event.getTarget());
+                @Nullable final EnumDyeColor shellColor = SHELL_COLOR_GETTER.get(held.getItem()).apply(held);
+
+                if(shellColor != null && shulkerColor != shellColor) {
+                    if(!event.getWorld().isRemote && !event.getEntityPlayer().isCreative()) held.shrink(1);
+                    ShulkerUtils.setColor((EntityShulker)event.getTarget(), shellColor);
+                    event.setCancellationResult(EnumActionResult.SUCCESS);
+                    event.setCanceled(true);
+
+                    // Close shulker and play FX.
+                    ((EntityShulker)event.getTarget()).updateArmorModifier(0);
+                    event.getEntityPlayer().swingArm(event.getHand());
+                    event.getTarget().playSound(ColoredShulkers.SHULKER_DYED, 1, 1);
+                    event.getWorld().spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, event.getTarget().posX, event.getTarget().posY + event.getTarget().height / 2, event.getTarget().posZ, 0, 0, 0);
+
+                    // Debugging
+                    ((QuarkHandler.EnchantCapability)Objects.requireNonNull(event.getTarget().getCapability(IEnchantColorProvider.CAPABILITY, null))).color = shellColor.getColorValue();
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    static void shulkerEgg(@Nonnull final LivingSpawnEvent.SpecialSpawn event) {
+        if(event.getEntity() instanceof EntityShulker && (event.getSpawner() == null ? ColoredShulkers.Cfg.enableWorld : ColoredShulkers.Cfg.enableSpawner)) {
+            ShulkerUtils.setColor((EntityShulker)event.getEntity(), WeightedRandom.getRandomItem(event.getWorld().rand, ColoredShulkers.Cfg.WEIGHTS).color);
+        }
+    }
+
+    @SideOnly(Side.CLIENT)
+    @SubscribeEvent(priority = EventPriority.LOW)
+    static void shulkerShellTooltip(@Nonnull final ItemTooltipEvent event) {
+        if(event.getItemStack().getItem() == Items.SHULKER_SHELL) event.getToolTip().add(1, ItemColoredShell.localizeColor(EnumDyeColor.PURPLE));
+        else if(event.getItemStack().getItem() == ColoredShulkers.SHELL) event.getToolTip().add(1, event.getItemStack().getMetadata() != 15
+                ? ItemColoredShell.localizeColor(ShulkerUtils.byShellDamage(event.getItemStack().getMetadata())) : I18n.format("color." + Tags.MOD_ID + ".rainbow"));
+    }
+
+    /**
+     * Allows modpack developers to have advanced control over the items able to dye shulkers.
+     * <p>By default, only shulker shells can be used to dye shulkers.</p>
+     */
+    @Nonnull
+    public static final Map<Item, Function<ItemStack, EnumDyeColor>> SHELL_COLOR_GETTER = new HashMap<>();
+}

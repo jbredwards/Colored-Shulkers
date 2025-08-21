@@ -1,0 +1,11 @@
+{
+  "entity.shulker.dyed": {
+    "subtitle": "subtitle.colored_shulkers.entity.shulker.dyed",
+    "sounds": [
+      {
+        "type": "event",
+        "name": "entity.lightning.impact"
+      }
+    ]
+  }
+}
