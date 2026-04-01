@@ -37,9 +37,9 @@ public final class ColoredShulkers
 
     @Mod.EventHandler
     static void init(@Nonnull final FMLInitializationEvent event) {
-        if(QUARK) QuarkHandler.init();
+        // if(QUARK) QuarkHandler.init();
         ShulkerEvents.SHELL_COLOR_GETTER.put(Items.SHULKER_SHELL, stack -> EnumDyeColor.PURPLE);
-        ShulkerEvents.SHELL_COLOR_GETTER.put(SHELL, stack -> ShulkerUtils.byShellDamage(stack.getMetadata()));
+        ShulkerEvents.SHELL_COLOR_GETTER.put(SHELL, stack -> ShulkerUtils.byShellDamage(stack.getMetadata()).orElse(null));
     }
 
     @Mod.EventHandler

@@ -4,6 +4,7 @@ import net.minecraft.entity.monster.EntityShulker;
 import net.minecraft.item.EnumDyeColor;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
 /**
  *
@@ -13,8 +14,9 @@ import javax.annotation.Nonnull;
 public interface ShulkerUtils
 {
     @Nonnull
-    static EnumDyeColor byShellDamage(final int meta) {
-        return EnumDyeColor.byDyeDamage(meta >= EnumDyeColor.PURPLE.getDyeDamage() ? meta + 1 : meta);
+    static Optional<EnumDyeColor> byShellDamage(final int meta) {
+        if(meta >= 15) return Optional.empty(); // Invalid shell.
+        else return Optional.of(EnumDyeColor.byDyeDamage(meta >= EnumDyeColor.PURPLE.getDyeDamage() ? meta + 1 : meta));
     }
 
     @Nonnull

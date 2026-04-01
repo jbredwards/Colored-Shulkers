@@ -20,6 +20,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Random;
 
 /**
  *
@@ -66,16 +67,10 @@ public final class ASMHandler implements IFMLLoadingPlugin
     @SuppressWarnings("unused")
     public static final class Hooks
     {
-        @Nonnull
-        public static EntityShulker applyRandomColor(@Nonnull final EntityShulker shulker) {
-            if(ColoredShulkers.Cfg.enableEndCity) {
-                final long rng = MathHelper.getCoordinateRandom((int)shulker.posX, (int)shulker.posY, (int)shulker.posZ);
-                final int weight = (int)(rng % WeightedRandom.getTotalWeight(ColoredShulkers.Cfg.WEIGHTS));
-
-                ShulkerUtils.setColor(shulker, WeightedRandom.getRandomItem(ColoredShulkers.Cfg.WEIGHTS, weight).color);
-            }
-
-            return shulker;
+        public static void applyRandomColor(@Nonnull final EntityShulker shulker) {
+            if(ColoredShulkers.Cfg.enableEndCity) ShulkerUtils.setColor(shulker, WeightedRandom.getRandomItem(
+                    new Random(MathHelper.getCoordinateRandom((int)shulker.posX, (int)shulker.posY, (int)shulker.posZ)),
+                    ColoredShulkers.Cfg.WEIGHTS).color);
         }
     }
 

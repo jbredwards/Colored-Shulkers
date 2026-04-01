@@ -30,6 +30,7 @@ repositories {
 
 dependencies {
     // Optional compatability
+    compileOnly rfg.deobf('curse.maven:autoreglib-250363:2746011')
     compileOnly rfg.deobf('curse.maven:just-enough-resources-240630:2728585')
     compileOnly rfg.deobf('curse.maven:quark-243121:2924091')
 

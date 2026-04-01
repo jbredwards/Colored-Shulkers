@@ -7,6 +7,7 @@ import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
@@ -26,6 +27,8 @@ import net.minecraftforge.oredict.ShapedOreRecipe;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
+import java.util.stream.IntStream;
 
 /**
  *
@@ -79,6 +82,7 @@ final class RegistryHandler
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
     static void registerModels(@Nonnull final ModelRegistryEvent event) {
-        for(int meta = 0; meta < 15; meta++) ModelLoader.setCustomModelResourceLocation(ColoredShulkers.SHELL, meta, new ModelResourceLocation(ColoredShulkers.SHELL.delegate.name(), ShulkerUtils.byShellDamage(meta).getName()));
+        ModelLoader.registerItemVariants(ColoredShulkers.SHELL, IntStream.range(0, 16).mapToObj(meta -> new ModelResourceLocation(Objects.requireNonNull(ColoredShulkers.SHELL.getRegistryName()), ShulkerUtils.byShellDamage(meta).map(EnumDyeColor::getName).orElse("invalid"))).toArray(ModelResourceLocation[]::new));
+        ModelLoader.setCustomMeshDefinition(ColoredShulkers.SHELL, stack -> new ModelResourceLocation(Objects.requireNonNull(ColoredShulkers.SHELL.getRegistryName()), ShulkerUtils.byShellDamage(stack.getMetadata()).map(EnumDyeColor::getName).orElse("invalid")));
     }
 }

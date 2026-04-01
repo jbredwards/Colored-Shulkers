@@ -26,7 +26,7 @@ public final class JERHandler
         for(@Nonnull final int[] meta = new int[1]; meta[0] < 15; meta[0]++) {
             @Nonnull final EntityShulker shulker = new EntityShulker(CompatBase.getWorld());
 
-            ShulkerUtils.setColor(shulker, ShulkerUtils.byShellDamage(meta[0]));
+            ShulkerUtils.setColor(shulker, ShulkerUtils.byShellDamage(meta[0]).orElseThrow(IllegalStateException::new));
             JERAPI.getInstance().getMobRegistry().register(shulker, LootTableHelper.toDrops(defaultLootTable).stream()
                     .peek(drop -> {
                         if(ColoredShulkers.Cfg.enableDrops && drop.item.getItem() == Items.SHULKER_SHELL)

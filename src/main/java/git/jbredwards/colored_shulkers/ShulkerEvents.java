@@ -85,7 +85,7 @@ public final class ShulkerEvents
                     event.getWorld().spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, event.getTarget().posX, event.getTarget().posY + event.getTarget().height / 2, event.getTarget().posZ, 0, 0, 0);
 
                     // Debugging
-                    ((QuarkHandler.EnchantCapability)Objects.requireNonNull(event.getTarget().getCapability(IEnchantColorProvider.CAPABILITY, null))).color = shellColor.getColorValue();
+                    // ((QuarkHandler.EnchantCapability)Objects.requireNonNull(event.getTarget().getCapability(IEnchantColorProvider.CAPABILITY, null))).setColor(shellColor.getColorValue());
                 }
             }
         }
@@ -102,8 +102,8 @@ public final class ShulkerEvents
     @SubscribeEvent(priority = EventPriority.LOW)
     static void shulkerShellTooltip(@Nonnull final ItemTooltipEvent event) {
         if(event.getItemStack().getItem() == Items.SHULKER_SHELL) event.getToolTip().add(1, ItemColoredShell.localizeColor(EnumDyeColor.PURPLE));
-        else if(event.getItemStack().getItem() == ColoredShulkers.SHELL) event.getToolTip().add(1, event.getItemStack().getMetadata() != 15
-                ? ItemColoredShell.localizeColor(ShulkerUtils.byShellDamage(event.getItemStack().getMetadata())) : I18n.format("color." + Tags.MOD_ID + ".rainbow"));
+        else if(event.getItemStack().getItem() == ColoredShulkers.SHELL) event.getToolTip().add(1, ShulkerUtils.byShellDamage(event.getItemStack().getMetadata())
+                .map(ItemColoredShell::localizeColor).orElseGet(() -> I18n.format("color." + Tags.MOD_ID + ".rainbow")));
     }
 
     /**
