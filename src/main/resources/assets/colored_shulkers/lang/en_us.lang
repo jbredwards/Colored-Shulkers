@@ -4,7 +4,6 @@ color.colored_shulkers.brown=%s
 color.colored_shulkers.cyan=%s
 color.colored_shulkers.gray=%s
 color.colored_shulkers.green=%s
-color.colored_shulkers.invalid=Missingno
 color.colored_shulkers.lime=%s
 color.colored_shulkers.lightBlue=%s
 color.colored_shulkers.magenta=%s
@@ -16,3 +15,5 @@ color.colored_shulkers.red=%s
 color.colored_shulkers.silver=%s
 color.colored_shulkers.white=%s
 color.colored_shulkers.yellow=%s
+
+tile.colored_shulkers.rainbow_shulker_box.name=Rainbow Shulker Box

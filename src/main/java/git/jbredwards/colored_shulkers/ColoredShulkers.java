@@ -2,6 +2,11 @@ package git.jbredwards.colored_shulkers;
 
 import git.jbredwards.colored_shulkers.compat.JERHandler;
 import git.jbredwards.colored_shulkers.compat.QuarkHandler;
+import git.jbredwards.colored_shulkers.registry.RainbowShulkerBox;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockDispenser;
+import net.minecraft.client.model.ModelShulker;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
@@ -10,6 +15,7 @@ import net.minecraft.util.WeightedRandom;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -32,14 +38,23 @@ public final class ColoredShulkers
     public static final boolean JER = Loader.isModLoaded("jeresources");
     public static final boolean QUARK = Loader.isModLoaded("quark");
 
+    public static Block RAINBOW_SHULKER_BOX;
     public static Item SHELL;
     public static SoundEvent SHULKER_DYED, SHULKER_ENCHANT;
 
     @Mod.EventHandler
     static void init(@Nonnull final FMLInitializationEvent event) {
-        // if(QUARK) QuarkHandler.init();
+        if(QUARK) QuarkHandler.init();
         ShulkerEvents.SHELL_COLOR_GETTER.put(Items.SHULKER_SHELL, stack -> EnumDyeColor.PURPLE);
-        ShulkerEvents.SHELL_COLOR_GETTER.put(SHELL, stack -> ShulkerUtils.byShellDamage(stack.getMetadata()).orElse(null));
+        ShulkerEvents.SHELL_COLOR_GETTER.put(SHELL, stack -> ShulkerUtils.colorFromShell(stack).orElse(null));
+        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(Item.getItemFromBlock(RAINBOW_SHULKER_BOX),
+        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.getObject(Item.getItemFromBlock(Blocks.WHITE_SHULKER_BOX)));
+    }
+
+    @Mod.EventHandler
+    static void initClient(@Nonnull final FMLInitializationEvent event) {
+        Item.getItemFromBlock(RAINBOW_SHULKER_BOX).setTileEntityItemStackRenderer(new RainbowShulkerBox.TEISR());
+        ClientRegistry.bindTileEntitySpecialRenderer(RainbowShulkerBox.Tile.class, new RainbowShulkerBox.TESR(new ModelShulker()));
     }
 
     @Mod.EventHandler

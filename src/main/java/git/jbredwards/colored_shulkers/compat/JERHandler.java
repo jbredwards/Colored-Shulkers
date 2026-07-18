@@ -2,6 +2,8 @@ package git.jbredwards.colored_shulkers.compat;
 
 import git.jbredwards.colored_shulkers.ColoredShulkers;
 import git.jbredwards.colored_shulkers.ShulkerUtils;
+import git.jbredwards.colored_shulkers.registry.ItemColoredShell;
+import io.netty.util.internal.IntegerHolder;
 import jeresources.api.drop.LootDrop;
 import jeresources.compatibility.CompatBase;
 import jeresources.compatibility.JERAPI;
@@ -23,14 +25,16 @@ public final class JERHandler
 {
     public static void postInit() {
         @Nonnull final LootTable defaultLootTable = LootTableHelper.getManager().getLootTableFromLocation(LootTableList.ENTITIES_SHULKER);
-        for(@Nonnull final int[] meta = new int[1]; meta[0] < 15; meta[0]++) {
+        for(@Nonnull final IntegerHolder meta = new IntegerHolder(); meta.value < 16; meta.value++) {
             @Nonnull final EntityShulker shulker = new EntityShulker(CompatBase.getWorld());
 
-            ShulkerUtils.setColor(shulker, ShulkerUtils.byShellDamage(meta[0]).orElseThrow(IllegalStateException::new));
+            if(meta.value == 15) ShulkerUtils.setRainbow(shulker);
+            else ShulkerUtils.setColor(shulker, ItemColoredShell.byShellDamage(meta.value).orElseThrow(IllegalStateException::new));
+
             JERAPI.getInstance().getMobRegistry().register(shulker, LootTableHelper.toDrops(defaultLootTable).stream()
                     .peek(drop -> {
                         if(ColoredShulkers.Cfg.enableDrops && drop.item.getItem() == Items.SHULKER_SHELL)
-                            drop.item = new ItemStack(ColoredShulkers.SHELL, drop.item.getCount(), meta[0]);
+                            drop.item = new ItemStack(ColoredShulkers.SHELL, drop.item.getCount(), meta.value);
                     })
                     .toArray(LootDrop[]::new));
         }

@@ -45,6 +45,7 @@ public final class QuarkHandler
 {
     public static void init() {
         MinecraftForge.EVENT_BUS.register(QuarkHandler.class);
+        NetworkHandler.register(MessageEnchant.class, Side.CLIENT);
         if(FMLCommonHandler.instance().getSide().isClient()) initClient();
     }
 
@@ -191,7 +192,6 @@ public final class QuarkHandler
         if(event.getTarget() instanceof EntityShulker) NetworkHandler.INSTANCE.sendTo(new MessageEnchant(event.getTarget()), (EntityPlayerMP)event.getEntityPlayer());
     }
 
-    static { NetworkHandler.register(MessageEnchant.class, Side.CLIENT); }
     public static final class MessageEnchant extends NetworkMessage<MessageEnchant>
     {
         public int color, entityId;

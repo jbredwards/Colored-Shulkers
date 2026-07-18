@@ -1,8 +1,7 @@
 package git.jbredwards.colored_shulkers;
 
-import git.jbredwards.colored_shulkers.compat.QuarkHandler;
+import com.google.common.collect.ImmutableMap;
 import git.jbredwards.colored_shulkers.registry.ItemColoredShell;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.monster.EntityShulker;
 import net.minecraft.init.Items;
 import net.minecraft.item.EnumDyeColor;
@@ -25,7 +24,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.ArrayUtils;
-import vazkii.quark.api.capability.IEnchantColorProvider;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -51,8 +49,10 @@ public final class ShulkerEvents
                             @Override
                             public ItemStack apply(@Nonnull final ItemStack stack, @Nonnull final Random rand, @Nonnull final LootContext context) {
                                 if(ColoredShulkers.Cfg.enableDrops && stack.getItem() == Items.SHULKER_SHELL && context.getLootedEntity() instanceof EntityShulker) {
+                                    if(ShulkerUtils.isRainbow((EntityShulker)context.getLootedEntity())) return new ItemStack(ColoredShulkers.SHELL, stack.getCount(), 15);
+
                                     @Nonnull final EnumDyeColor color = ShulkerUtils.getColor((EntityShulker)context.getLootedEntity());
-                                    if(color != EnumDyeColor.PURPLE) return ItemColoredShell.create(color, stack.getCount());
+                                    if(color != EnumDyeColor.PURPLE) return ShulkerUtils.shellFromColor(color, stack.getCount());
                                 }
 
                                 return stack;
@@ -101,9 +101,7 @@ public final class ShulkerEvents
     @SideOnly(Side.CLIENT)
     @SubscribeEvent(priority = EventPriority.LOW)
     static void shulkerShellTooltip(@Nonnull final ItemTooltipEvent event) {
-        if(event.getItemStack().getItem() == Items.SHULKER_SHELL) event.getToolTip().add(1, ItemColoredShell.localizeColor(EnumDyeColor.PURPLE));
-        else if(event.getItemStack().getItem() == ColoredShulkers.SHELL) event.getToolTip().add(1, ShulkerUtils.byShellDamage(event.getItemStack().getMetadata())
-                .map(ItemColoredShell::localizeColor).orElseGet(() -> I18n.format("color." + Tags.MOD_ID + ".rainbow")));
+        ShulkerUtils.colorFromShell(event.getItemStack()).ifPresent(color -> event.getToolTip().add(1, ItemColoredShell.localizeColor(color)));
     }
 
     /**
@@ -112,4 +110,24 @@ public final class ShulkerEvents
      */
     @Nonnull
     public static final Map<Item, Function<ItemStack, EnumDyeColor>> SHELL_COLOR_GETTER = new HashMap<>();
+
+    /**
+     * The list of dye items that can be made from colored shulker shells.
+     * <p>Public so we can support generic modded dye items, like the BOP dyes.</p>
+     */
+    @Nonnull
+    public static final Map<EnumDyeColor, ItemStack> SHELL_TO_DYE = new HashMap<>(ImmutableMap.<EnumDyeColor, ItemStack>builder()
+            .put(EnumDyeColor.ORANGE, new ItemStack(Items.DYE, 8, EnumDyeColor.ORANGE.getDyeDamage()))
+            .put(EnumDyeColor.MAGENTA, new ItemStack(Items.DYE, 8, EnumDyeColor.MAGENTA.getDyeDamage()))
+            .put(EnumDyeColor.LIGHT_BLUE, new ItemStack(Items.DYE, 8, EnumDyeColor.LIGHT_BLUE.getDyeDamage()))
+            .put(EnumDyeColor.YELLOW, new ItemStack(Items.DYE, 8, EnumDyeColor.YELLOW.getDyeDamage()))
+            .put(EnumDyeColor.LIME, new ItemStack(Items.DYE, 8, EnumDyeColor.LIME.getDyeDamage()))
+            .put(EnumDyeColor.PINK, new ItemStack(Items.DYE, 8, EnumDyeColor.PINK.getDyeDamage()))
+            .put(EnumDyeColor.GRAY, new ItemStack(Items.DYE, 8, EnumDyeColor.GRAY.getDyeDamage()))
+            .put(EnumDyeColor.SILVER, new ItemStack(Items.DYE, 8, EnumDyeColor.SILVER.getDyeDamage()))
+            .put(EnumDyeColor.CYAN, new ItemStack(Items.DYE, 8, EnumDyeColor.CYAN.getDyeDamage()))
+            .put(EnumDyeColor.PURPLE, new ItemStack(Items.DYE, 8, EnumDyeColor.PURPLE.getDyeDamage()))
+            .put(EnumDyeColor.GREEN, new ItemStack(Items.DYE, 8, EnumDyeColor.GREEN.getDyeDamage()))
+            .put(EnumDyeColor.RED, new ItemStack(Items.DYE, 8, EnumDyeColor.RED.getDyeDamage()))
+            .build());
 }
