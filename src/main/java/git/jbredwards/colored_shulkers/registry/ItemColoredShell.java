@@ -1,18 +1,26 @@
 package git.jbredwards.colored_shulkers.registry;
 
+import git.jbredwards.colored_shulkers.ColoredShulkers;
 import git.jbredwards.colored_shulkers.Tags;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.item.EnumDyeColor;
-import net.minecraft.item.EnumRarity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.entity.item.EntityXPOrb;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.*;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+import net.minecraft.world.storage.loot.LootContext;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -52,18 +60,7 @@ public class ItemColoredShell extends Item
     public void addInformation(@Nonnull final ItemStack stack, @Nullable final World worldIn, @Nonnull final List<String> tooltip, @Nonnull final ITooltipFlag flagIn) {
         if(stack.getMetadata() == 15) {
             tooltip.add(1, rainbowFormat[RainbowShulkerBox.getTicks(0.00075) % rainbowFormat.length] + I18n.format("color." + Tags.MOD_ID + ".rainbow"));
-            /*final int time = RainbowShulkerBoxTESR.getTicks(0.005);
-
-            @Nonnull final String text = I18n.format("color." + Tags.MOD_ID + ".rainbow");
-            @Nonnull final StringBuilder builder = new StringBuilder();
-
-            for(int i = 0; i < text.length(); i++) {
-                builder.append(rainbowFormat[(time + i) % rainbowFormat.length]);
-                builder.append(text.charAt(i));
-            }
-
-            builder.append(TextFormatting.RESET);
-            tooltip.add(1, builder.toString());*/
+            if(ColoredShulkers.Cfg.rainbowShellBreaking) tooltip.add(1, I18n.format("tooltip." + Tags.MOD_ID + ".rainbow_shulker_shell." + (GuiScreen.isShiftKeyDown() ? "shown" : "hidden")));
         }
     }
 
@@ -71,5 +68,36 @@ public class ItemColoredShell extends Item
     @Override
     public EnumRarity getRarity(@Nonnull final ItemStack stack) {
         return stack.getMetadata() == 15 ? EnumRarity.RARE : super.getRarity(stack);
+    }
+
+    @Nonnull
+    @Override
+    public ActionResult<ItemStack> onItemRightClick(@Nonnull final World worldIn, @Nonnull final EntityPlayer playerIn, @Nonnull final EnumHand handIn) {
+        if(ColoredShulkers.Cfg.rainbowShellBreaking) {
+            @Nonnull final ItemStack held = playerIn.getHeldItem(handIn);
+            if(!held.isEmpty() && held.getMetadata() == 15) {
+                if(worldIn instanceof WorldServer) {
+                    final int consumed = playerIn.isSneaking() ? Math.min(16, held.getCount()) : 1;
+                    worldIn.getLootTableManager().getLootTableFromLocation(ColoredShulkers.RAINBOW_SHELL_TABLE).generateLootForPools(worldIn.rand,
+                    new LootContext.Builder((WorldServer)worldIn).withPlayer(playerIn).withLuck(consumed - 1).build()).forEach(shell -> {
+                        if(playerIn instanceof FakePlayer) ItemHandlerHelper.giveItemToPlayer(playerIn, shell);
+                        else playerIn.dropItem(shell, false, false);
+                    });
+
+                    if(!(playerIn instanceof FakePlayer)) for(int i = ColoredShulkers.Cfg.rainbowShellXP * consumed; i > 0;) {
+                        final int split = EntityXPOrb.getXPSplit(i);
+                        worldIn.spawnEntity(new EntityXPOrb(worldIn, playerIn.posX, playerIn.posY + playerIn.getEyeHeight(), playerIn.posZ, split));
+                        i -= split;
+                    }
+
+                    worldIn.playSound(null, playerIn.posX, playerIn.posY, playerIn.posZ, ColoredShulkers.RAINBOW_SHELL_USE, playerIn.getSoundCategory(), 1, 1);
+                    held.shrink(consumed);
+                }
+
+                return ActionResult.newResult(EnumActionResult.SUCCESS, held);
+            }
+        }
+
+        return super.onItemRightClick(worldIn, playerIn, handIn);
     }
 }

@@ -5,9 +5,11 @@ import net.minecraft.entity.monster.EntityShulker;
 import net.minecraft.init.Items;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.WeightedRandom;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
+import java.util.Random;
 
 /**
  *
@@ -40,7 +42,7 @@ public interface ShulkerUtils
     // ------
 
     @Nonnull
-    String RAINBOW_TAG = Tags.MOD_ID + ":rainbow";
+    String DROPS_TAG = Tags.MOD_ID + ":drops", RAINBOW_TAG = Tags.MOD_ID + ":rainbow";
 
     @Nonnull
     static EnumDyeColor getColor(@Nonnull final EntityShulker shulker) {
@@ -59,5 +61,12 @@ public interface ShulkerUtils
     static void setRainbow(@Nonnull final EntityShulker shulker) {
         shulker.getDataManager().set(EntityShulker.COLOR, (byte)0);
         shulker.getEntityData().setBoolean(RAINBOW_TAG, true);
+    }
+
+    static void setRandomColor(@Nonnull final EntityShulker shulker, @Nonnull final Random rand, @Nonnull final ColoredShulkers.Cfg.EnableType cfg) {
+        if(cfg != ColoredShulkers.Cfg.EnableType.DISABLED) {
+            if(cfg == ColoredShulkers.Cfg.EnableType.ENABLED && rand.nextDouble() < ColoredShulkers.Cfg.shulkerChanceRainbow) setRainbow(shulker);
+            else setColor(shulker, WeightedRandom.getRandomItem(rand, ColoredShulkers.Cfg.WEIGHTS).color);
+        }
     }
 }

@@ -1,6 +1,9 @@
 package git.jbredwards.colored_shulkers.registry;
 
 import git.jbredwards.colored_shulkers.ColoredShulkers;
+import git.jbredwards.colored_shulkers.ShulkerUtils;
+import git.jbredwards.colored_shulkers.Tags;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.block.BlockShulkerBox;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelShulker;
@@ -8,6 +11,9 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.tileentity.TileEntityItemStackRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.renderer.tileentity.TileEntityShulkerBoxRenderer;
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.monster.EntityShulker;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.ItemShulkerBox;
@@ -15,11 +21,15 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityShulkerBox;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.awt.*;
 
 /**
@@ -29,6 +39,16 @@ import java.awt.*;
  */
 public final class RainbowShulkerBox
 {
+    @Nonnull
+    public static final CreativeTabs TAB = new CreativeTabs(Tags.MOD_ID + ".tab") {
+        @Nonnull
+        @SideOnly(Side.CLIENT)
+        @Override
+        public ItemStack createIcon() {
+            return new ItemStack(ColoredShulkers.RAINBOW_SHULKER_BOX);
+        }
+    };
+
     @SideOnly(Side.CLIENT)
     public static int getRGB() {
         return Color.HSBtoRGB(getTicks(0.05) / 255f, 0.8f, 1);
@@ -100,6 +120,35 @@ public final class RainbowShulkerBox
                     return EnumRarity.RARE;
                 }
             };
+        }
+    }
+
+    public static class Sync implements IMessage, IMessageHandler<Sync, IMessage>
+    {
+        public int id;
+
+        @Override
+        public void fromBytes(@Nonnull final ByteBuf buf) {
+            id = buf.readInt();
+        }
+
+        @Override
+        public void toBytes(@Nonnull final ByteBuf buf) {
+            buf.writeInt(id);
+        }
+
+        @Nullable
+        @Override
+        public IMessage onMessage(@Nonnull final Sync message, @Nonnull final MessageContext ctx) {
+            if(ctx.side.isClient()) Minecraft.getMinecraft().addScheduledTask(() -> {
+                @Nullable final World world = Minecraft.getMinecraft().world;
+                if(world != null) {
+                    @Nullable final Entity entity = world.getEntityByID(message.id);
+                    if(entity instanceof EntityShulker) ShulkerUtils.setRainbow((EntityShulker)entity);
+                }
+            });
+
+            return null;
         }
     }
 }

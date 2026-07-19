@@ -1,7 +1,6 @@
 package git.jbredwards.colored_shulkers;
 
 import git.jbredwards.colored_shulkers.compat.JERHandler;
-import git.jbredwards.colored_shulkers.compat.QuarkHandler;
 import git.jbredwards.colored_shulkers.registry.RainbowShulkerBox;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDispenser;
@@ -10,8 +9,10 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.WeightedRandom;
+import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
@@ -21,6 +22,9 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import net.minecraftforge.fml.relauncher.Side;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -35,20 +39,23 @@ import java.util.List;
 @Mod(modid = Tags.MOD_ID, name = Tags.MOD_NAME, version = Tags.VERSION)
 public final class ColoredShulkers
 {
-    public static final boolean JER = Loader.isModLoaded("jeresources");
-    public static final boolean QUARK = Loader.isModLoaded("quark");
+    @Nonnull public static final ResourceLocation RAINBOW_SHELL_TABLE = LootTableList.register(new ResourceLocation(Tags.MOD_ID, "rainbow_shell_shatter"));
+    @Nonnull public static final SimpleNetworkWrapper WRAPPER = NetworkRegistry.INSTANCE.newSimpleChannel(Tags.MOD_ID);
 
     public static Block RAINBOW_SHULKER_BOX;
     public static Item SHELL;
-    public static SoundEvent SHULKER_DYED, SHULKER_ENCHANT;
+    public static SoundEvent RAINBOW_SHELL_USE, SHULKER_DYED, SHULKER_ENCHANT;
 
     @Mod.EventHandler
     static void init(@Nonnull final FMLInitializationEvent event) {
-        if(QUARK) QuarkHandler.init();
-        ShulkerEvents.SHELL_COLOR_GETTER.put(Items.SHULKER_SHELL, stack -> EnumDyeColor.PURPLE);
-        ShulkerEvents.SHELL_COLOR_GETTER.put(SHELL, stack -> ShulkerUtils.colorFromShell(stack).orElse(null));
         BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(Item.getItemFromBlock(RAINBOW_SHULKER_BOX),
         BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.getObject(Item.getItemFromBlock(Blocks.WHITE_SHULKER_BOX)));
+        ShulkerEvents.SHELL_COLOR_GETTER.put(Items.SHULKER_SHELL, stack -> ShulkerEvents.ShulkerType.color(EnumDyeColor.PURPLE));
+        ShulkerEvents.SHELL_COLOR_GETTER.put(SHELL, stack -> {
+            if(stack.getMetadata() == 15) return ShulkerEvents.ShulkerType.rainbow();
+            else return ShulkerUtils.colorFromShell(stack).map(ShulkerEvents.ShulkerType::color).orElse(null);
+        });
+        WRAPPER.registerMessage(RainbowShulkerBox.Sync.class, RainbowShulkerBox.Sync.class, 0, Side.CLIENT);
     }
 
     @Mod.EventHandler
@@ -59,7 +66,7 @@ public final class ColoredShulkers
 
     @Mod.EventHandler
     static void postInit(@Nonnull final FMLPostInitializationEvent event) {
-        if(JER) JERHandler.postInit();
+        if(Loader.isModLoaded("jeresources")) JERHandler.postInit();
         Cfg.sync();
     }
 
@@ -74,17 +81,33 @@ public final class ColoredShulkers
     @Config(modid = Tags.MOD_ID)
     public static final class Cfg
     {
+        public enum EnableType
+        {
+            ENABLED,
+            COLOR_ONLY,
+            DISABLED
+        }
+
         @Config.LangKey("cfg." + Tags.MOD_ID + ".enableDrops")
         public static boolean enableDrops = true;
 
         @Config.LangKey("cfg." + Tags.MOD_ID + ".enableEndCity")
-        public static boolean enableEndCity = true;
+        @Nonnull public static EnableType enableEndCity = EnableType.ENABLED;
 
         @Config.LangKey("cfg." + Tags.MOD_ID + ".enableSpawner")
-        public static boolean enableSpawner = false;
+        @Nonnull public static EnableType enableSpawner = EnableType.DISABLED;
 
         @Config.LangKey("cfg." + Tags.MOD_ID + ".enableWorld")
-        public static boolean enableWorld = false;
+        @Nonnull public static EnableType enableWorld = EnableType.DISABLED;
+
+        @Config.LangKey("cfg." + Tags.MOD_ID + ".rainbowShellBreaking")
+        public static boolean rainbowShellBreaking = true;
+
+        @Config.LangKey("cfg." + Tags.MOD_ID + ".rainbowShellXP")
+        public static int rainbowShellXP = 55;
+
+        @Config.LangKey("cfg." + Tags.MOD_ID + ".shulkerChanceRainbow")
+        public static double shulkerChanceRainbow = 0.05;
 
         @Config.LangKey("cfg." + Tags.MOD_ID + ".shulkerWeightRed")
         public static int shulkerWeightRed = 1;

@@ -119,14 +119,14 @@ final class RegistryHandler
     @SubscribeEvent
     static void registerBlocks(@Nonnull final RegistryEvent.Register<Block> event) {
         GameRegistry.registerTileEntity(RainbowShulkerBox.Tile.class, new ResourceLocation(Tags.MOD_ID, "tile"));
-        event.getRegistry().register(ColoredShulkers.RAINBOW_SHULKER_BOX = RainbowShulkerBox.Tile.asBlock()
+        event.getRegistry().register(ColoredShulkers.RAINBOW_SHULKER_BOX = RainbowShulkerBox.Tile.asBlock().setCreativeTab(RainbowShulkerBox.TAB)
                 .setHardness(2).setTranslationKey(Tags.MOD_ID + ".rainbow_shulker_box").setRegistryName("rainbow_shulker_box"));
     }
 
     @SubscribeEvent
     static void registerItems(@Nonnull final RegistryEvent.Register<Item> event) {
-        event.getRegistry().register(ColoredShulkers.SHELL = new ItemColoredShell().setRegistryName("shell").setTranslationKey("shulkerShell"));
         event.getRegistry().register(RainbowShulkerBox.Tile.asItem().setRegistryName("rainbow_shulker_box"));
+        event.getRegistry().register(ColoredShulkers.SHELL = new ItemColoredShell().setCreativeTab(RainbowShulkerBox.TAB).setRegistryName("shell").setTranslationKey("shulkerShell"));
 
         OreDictionary.registerOre("shellShulker", Items.SHULKER_SHELL);
         OreDictionary.registerOre("shellShulker", new ItemStack(ColoredShulkers.SHELL, 1, OreDictionary.WILDCARD_VALUE));
@@ -137,13 +137,15 @@ final class RegistryHandler
 
     @SubscribeEvent
     static void registerSounds(@Nonnull final RegistryEvent.Register<SoundEvent> event) {
-        event.getRegistry().registerAll(ColoredShulkers.SHULKER_DYED = new SoundEvent(new ResourceLocation(Tags.MOD_ID, "entity.shulker.dyed")).setRegistryName("entity.shulker.dyed"),
+        event.getRegistry().registerAll(ColoredShulkers.RAINBOW_SHELL_USE = new SoundEvent(new ResourceLocation(Tags.MOD_ID, "item.rainbow_shell.use")).setRegistryName("item.rainbow_shell.use"),
+                                        ColoredShulkers.SHULKER_DYED = new SoundEvent(new ResourceLocation(Tags.MOD_ID, "entity.shulker.dyed")).setRegistryName("entity.shulker.dyed"),
                                         ColoredShulkers.SHULKER_ENCHANT = new SoundEvent(new ResourceLocation(Tags.MOD_ID, "entity.shulker.enchant")).setRegistryName("entity.shulker.enchant"));
     }
 
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
     static void registerBakedModels(@Nonnull final ModelBakeEvent event) {
+        // TODO: Is there a way through blockstate json to specify "builtin/entity" using forge_marker and provide it a particle texture?
         @Nonnull final ModelResourceLocation location = new ModelResourceLocation(ColoredShulkers.RAINBOW_SHULKER_BOX.delegate.name(), "normal");
         @Nonnull final IBakedModel soulSand = event.getModelManager().getModel(new ModelResourceLocation("soul_sand"));
         event.getModelRegistry().putObject(location, new BuiltInModel(soulSand.getItemCameraTransforms(), ItemOverrideList.NONE) {

@@ -1,4 +1,14 @@
 {
+  "item.rainbow_shell.use": {
+    "subtitle": "subtitle.colored_shulkers.item.rainbow_shell.use",
+    "sounds": [
+      {
+        "type": "event",
+        "name": "entity.shulker.open",
+        "pitch": 2
+      }
+    ]
+  },
   "entity.shulker.dyed": {
     "subtitle": "subtitle.colored_shulkers.entity.shulker.dyed",
     "sounds": [

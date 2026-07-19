@@ -2,9 +2,10 @@ package git.jbredwards.colored_shulkers.asm;
 
 import git.jbredwards.colored_shulkers.ColoredShulkers;
 import git.jbredwards.colored_shulkers.ShulkerUtils;
+import git.jbredwards.colored_shulkers.registry.RainbowShulkerBox;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.monster.EntityShulker;
 import net.minecraft.launchwrapper.IClassTransformer;
-import net.minecraft.util.WeightedRandom;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
@@ -39,7 +40,50 @@ public final class ASMHandler implements IFMLLoadingPlugin
         @Nullable
         @Override
         public byte[] transform(@Nullable final String name, @Nullable final String transformedName, @Nullable final byte[] basicClass) {
-            if(basicClass != null && "net.minecraft.world.gen.structure.StructureEndCityPieces$CityTemplate".equals(transformedName)) {
+            if(basicClass == null) return null;
+            else if("net.minecraft.client.renderer.entity.RenderShulker".equals(transformedName)) {
+                @Nonnull final ClassNode classNode = new ClassNode();
+                new ClassReader(basicClass).accept(classNode, 0);
+                classNode.methods.removeIf(method -> method.name.equals(FMLLaunchHandler.isDeobfuscatedEnvironment() ? "renderModel" : "func_77036_a"));
+
+                @Nonnull final MethodNode generic = new MethodNode(Opcodes.ACC_PROTECTED | Opcodes.ACC_BRIDGE | Opcodes.ACC_SYNTHETIC, FMLLaunchHandler.isDeobfuscatedEnvironment() ? "renderModel" : "func_77036_a", "(Lnet/minecraft/entity/EntityLivingBase;FFFFFF)V", null, null);
+                generic.visitVarInsn(Opcodes.ALOAD, 0);
+                generic.visitVarInsn(Opcodes.ALOAD, 1);
+                generic.visitTypeInsn(Opcodes.CHECKCAST, "net/minecraft/entity/monster/EntityShulker");
+                generic.visitVarInsn(Opcodes.FLOAD, 2);
+                generic.visitVarInsn(Opcodes.FLOAD, 3);
+                generic.visitVarInsn(Opcodes.FLOAD, 4);
+                generic.visitVarInsn(Opcodes.FLOAD, 5);
+                generic.visitVarInsn(Opcodes.FLOAD, 6);
+                generic.visitVarInsn(Opcodes.FLOAD, 7);
+                generic.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "net/minecraft/client/renderer/entity/RenderShulker", FMLLaunchHandler.isDeobfuscatedEnvironment() ? "renderModel" : "func_77036_a", "(Lnet/minecraft/entity/monster/EntityShulker;FFFFFF)V", false);
+                generic.visitInsn(Opcodes.RETURN);
+                classNode.methods.add(generic);
+
+                @Nonnull final MethodNode typed = new MethodNode(Opcodes.ACC_PROTECTED, FMLLaunchHandler.isDeobfuscatedEnvironment() ? "renderModel" : "func_77036_a", "(Lnet/minecraft/entity/monster/EntityShulker;FFFFFF)V", null, null);
+                typed.visitVarInsn(Opcodes.ALOAD, 1);
+                typed.visitMethodInsn(Opcodes.INVOKESTATIC, "git/jbredwards/colored_shulkers/asm/ASMHandler$Hooks", "applyRainbowColor", "(Lnet/minecraft/entity/monster/EntityShulker;)V", false);
+                typed.visitVarInsn(Opcodes.ALOAD, 0);
+                typed.visitVarInsn(Opcodes.ALOAD, 1);
+                typed.visitVarInsn(Opcodes.FLOAD, 2);
+                typed.visitVarInsn(Opcodes.FLOAD, 3);
+                typed.visitVarInsn(Opcodes.FLOAD, 4);
+                typed.visitVarInsn(Opcodes.FLOAD, 5);
+                typed.visitVarInsn(Opcodes.FLOAD, 6);
+                typed.visitVarInsn(Opcodes.FLOAD, 7);
+                typed.visitMethodInsn(Opcodes.INVOKESPECIAL, "net/minecraft/client/renderer/entity/RenderLivingBase", FMLLaunchHandler.isDeobfuscatedEnvironment() ? "renderModel" : "func_77036_a", "(Lnet/minecraft/entity/EntityLivingBase;FFFFFF)V", false);
+                typed.visitInsn(Opcodes.FCONST_1);
+                typed.visitInsn(Opcodes.FCONST_1);
+                typed.visitInsn(Opcodes.FCONST_1);
+                typed.visitMethodInsn(Opcodes.INVOKESTATIC, "net/minecraft/client/renderer/GlStateManager", FMLLaunchHandler.isDeobfuscatedEnvironment() ? "color" : "func_179124_c", "(FFF)V", false);
+                typed.visitInsn(Opcodes.RETURN);
+                classNode.methods.add(typed);
+
+                @Nonnull final ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+                classNode.accept(writer);
+                return writer.toByteArray();
+            }
+            else if("net.minecraft.world.gen.structure.StructureEndCityPieces$CityTemplate".equals(transformedName)) {
                 @Nonnull final ClassNode classNode = new ClassNode();
                 new ClassReader(basicClass).accept(classNode, 0);
                 methods:
@@ -67,10 +111,16 @@ public final class ASMHandler implements IFMLLoadingPlugin
     @SuppressWarnings("unused")
     public static final class Hooks
     {
+        public static void applyRainbowColor(@Nonnull final EntityShulker shulker) {
+            if(ShulkerUtils.isRainbow(shulker)) {
+                final int rgb = RainbowShulkerBox.getRGB();
+                GlStateManager.color((rgb >> 16 & 255) / 255f, (rgb >> 8 & 255) / 255f, (rgb & 255) / 255f);
+            }
+        }
+
         public static void applyRandomColor(@Nonnull final EntityShulker shulker) {
-            if(ColoredShulkers.Cfg.enableEndCity) ShulkerUtils.setColor(shulker, WeightedRandom.getRandomItem(
-                    new Random(MathHelper.getCoordinateRandom((int)shulker.posX, (int)shulker.posY, (int)shulker.posZ)),
-                    ColoredShulkers.Cfg.WEIGHTS).color);
+            final long posSeed = MathHelper.getCoordinateRandom((int)shulker.posX, (int)shulker.posY, (int)shulker.posZ);
+            ShulkerUtils.setRandomColor(shulker, new Random(posSeed ^ shulker.world.getSeed()), ColoredShulkers.Cfg.enableEndCity);
         }
     }
 

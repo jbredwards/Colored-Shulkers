@@ -1,0 +1,384 @@
+{
+  "pools": [
+    {
+      "name": "white",
+      "rolls": 1,
+      "bonus_rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "name": "colored_shulkers:shell",
+          "functions": [
+            {
+              "function": "set_count",
+              "count": {
+                "min": 0,
+                "max": 1
+              }
+            },
+            {
+              "function": "set_data",
+              "data": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "orange",
+      "rolls": 1,
+      "bonus_rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "name": "colored_shulkers:shell",
+          "functions": [
+            {
+              "function": "set_count",
+              "count": {
+                "min": 0,
+                "max": 1
+              }
+            },
+            {
+              "function": "set_data",
+              "data": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "magenta",
+      "rolls": 1,
+      "bonus_rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "name": "colored_shulkers:shell",
+          "functions": [
+            {
+              "function": "set_count",
+              "count": {
+                "min": 0,
+                "max": 1
+              }
+            },
+            {
+              "function": "set_data",
+              "data": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "light_blue",
+      "rolls": 1,
+      "bonus_rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "name": "colored_shulkers:shell",
+          "functions": [
+            {
+              "function": "set_count",
+              "count": {
+                "min": 0,
+                "max": 1
+              }
+            },
+            {
+              "function": "set_data",
+              "data": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "yellow",
+      "rolls": 1,
+      "bonus_rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "name": "colored_shulkers:shell",
+          "functions": [
+            {
+              "function": "set_count",
+              "count": {
+                "min": 0,
+                "max": 1
+              }
+            },
+            {
+              "function": "set_data",
+              "data": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "lime",
+      "rolls": 1,
+      "bonus_rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "name": "colored_shulkers:shell",
+          "functions": [
+            {
+              "function": "set_count",
+              "count": {
+                "min": 0,
+                "max": 1
+              }
+            },
+            {
+              "function": "set_data",
+              "data": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "pink",
+      "rolls": 1,
+      "bonus_rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "name": "colored_shulkers:shell",
+          "functions": [
+            {
+              "function": "set_count",
+              "count": {
+                "min": 0,
+                "max": 1
+              }
+            },
+            {
+              "function": "set_data",
+              "data": 6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "gray",
+      "rolls": 1,
+      "bonus_rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "name": "colored_shulkers:shell",
+          "functions": [
+            {
+              "function": "set_count",
+              "count": {
+                "min": 0,
+                "max": 1
+              }
+            },
+            {
+              "function": "set_data",
+              "data": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "light_gray",
+      "rolls": 1,
+      "bonus_rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "name": "colored_shulkers:shell",
+          "functions": [
+            {
+              "function": "set_count",
+              "count": {
+                "min": 0,
+                "max": 1
+              }
+            },
+            {
+              "function": "set_data",
+              "data": 8
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "cyan",
+      "rolls": 1,
+      "bonus_rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "name": "colored_shulkers:shell",
+          "functions": [
+            {
+              "function": "set_count",
+              "count": {
+                "min": 0,
+                "max": 1
+              }
+            },
+            {
+              "function": "set_data",
+              "data": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "purple",
+      "rolls": 1,
+      "bonus_rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "name": "shulker_shell",
+          "functions": [
+            {
+              "function": "set_count",
+              "count": {
+                "min": 0,
+                "max": 1
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "blue",
+      "rolls": 1,
+      "bonus_rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "name": "colored_shulkers:shell",
+          "functions": [
+            {
+              "function": "set_count",
+              "count": {
+                "min": 0,
+                "max": 1
+              }
+            },
+            {
+              "function": "set_data",
+              "data": 10
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "brown",
+      "rolls": 1,
+      "bonus_rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "name": "colored_shulkers:shell",
+          "functions": [
+            {
+              "function": "set_count",
+              "count": {
+                "min": 0,
+                "max": 1
+              }
+            },
+            {
+              "function": "set_data",
+              "data": 11
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "green",
+      "rolls": 1,
+      "bonus_rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "name": "colored_shulkers:shell",
+          "functions": [
+            {
+              "function": "set_count",
+              "count": {
+                "min": 0,
+                "max": 1
+              }
+            },
+            {
+              "function": "set_data",
+              "data": 12
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "red",
+      "rolls": 1,
+      "bonus_rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "name": "colored_shulkers:shell",
+          "functions": [
+            {
+              "function": "set_count",
+              "count": {
+                "min": 0,
+                "max": 1
+              }
+            },
+            {
+              "function": "set_data",
+              "data": 13
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "black",
+      "rolls": 1,
+      "bonus_rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "name": "colored_shulkers:shell",
+          "functions": [
+            {
+              "function": "set_count",
+              "count": {
+                "min": 0,
+                "max": 1
+              }
+            },
+            {
+              "function": "set_data",
+              "data": 14
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
