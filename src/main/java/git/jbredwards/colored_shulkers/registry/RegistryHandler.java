@@ -79,27 +79,10 @@ final class RegistryHandler
             else return ingredient;
         });
 
-        // Shells to dyes (BOP).
-        if(Loader.isModLoaded("biomesoplenty")) {
-            Optional.ofNullable(Item.getByNameOrId("biomesoplenty:black_dye")).ifPresent(item -> ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLACK, new ItemStack(item, 8)));
-            Optional.ofNullable(Item.getByNameOrId("biomesoplenty:blue_dye")).ifPresent(item -> ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLUE, new ItemStack(item, 8)));
-            Optional.ofNullable(Item.getByNameOrId("biomesoplenty:brown_dye")).ifPresent(item -> ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BROWN, new ItemStack(item, 8)));
-            Optional.ofNullable(Item.getByNameOrId("biomesoplenty:white_dye")).ifPresent(item -> ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.WHITE, new ItemStack(item, 8)));
-        }
-
-        // Shells to dyes (FutureMC).
-        else Optional.ofNullable(Item.getByNameOrId("futuremc:dye")).ifPresent(item -> {
-            ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLACK, new ItemStack(item, 8, 3));
-            ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLUE, new ItemStack(item, 8, 1));
-            ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BROWN, new ItemStack(item, 8, 2));
-            ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.WHITE, new ItemStack(item, 8));
-        });
-
         // Shells to dyes.
-        ShulkerEvents.SHELL_TO_DYE.forEach((color, dye) ->
-                event.getRegistry().register(new ShapelessOreRecipe(null, dye,
-                        ShulkerUtils.shellFromColor(color, 1))
-                        .setRegistryName("shell_to_dye/" + color)));
+        extraShellsToDyes();
+        ShulkerEvents.SHELL_TO_DYE.forEach((color, dye) -> event.getRegistry().register(
+                new ShapelessOreRecipe(null, dye, ShulkerUtils.shellFromColor(color, 1)).setRegistryName("shell_to_dye/" + color)));
 
         // Shell dying.
         event.getRegistry().registerAll(Arrays.stream(EnumDyeColor.values())
@@ -171,5 +154,28 @@ final class RegistryHandler
     @SideOnly(Side.CLIENT)
     static void registerColors(@Nonnull final ColorHandlerEvent.Item event) {
         event.getItemColors().registerItemColorHandler((stack, tintIndex) -> tintIndex == 0 && stack.getMetadata() == 15 ? RainbowShulkerBox.getRGB() : -1, ColoredShulkers.SHELL);
+    }
+
+    private static void extraShellsToDyes() {
+        // Shells to dyes (BOP).
+        if(Loader.isModLoaded("biomesoplenty")) {
+            Optional.ofNullable(Item.getByNameOrId("biomesoplenty:black_dye")).ifPresent(item -> ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLACK, new ItemStack(item, 8)));
+            Optional.ofNullable(Item.getByNameOrId("biomesoplenty:blue_dye")).ifPresent(item -> ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLUE, new ItemStack(item, 8)));
+            Optional.ofNullable(Item.getByNameOrId("biomesoplenty:brown_dye")).ifPresent(item -> ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BROWN, new ItemStack(item, 8)));
+            Optional.ofNullable(Item.getByNameOrId("biomesoplenty:white_dye")).ifPresent(item -> ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.WHITE, new ItemStack(item, 8)));
+        }
+        else {
+            // Shells to dyes (FutureMC).
+            Optional.ofNullable(Item.getByNameOrId("futuremc:dye")).ifPresent(item -> {
+                ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLACK, new ItemStack(item, 8, 3));
+                ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLUE, new ItemStack(item, 8, 1));
+                ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BROWN, new ItemStack(item, 8, 2));
+                ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.WHITE, new ItemStack(item, 8));
+            });
+            // Shells to dyes (Natura).
+            Optional.ofNullable(Item.getByNameOrId("natura:materials")).ifPresent(item ->
+                ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLUE, new ItemStack(item, 8, 8))
+            );
+        }
     }
 }
