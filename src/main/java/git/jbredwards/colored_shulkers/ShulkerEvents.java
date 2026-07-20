@@ -26,6 +26,7 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.oredict.DyeUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nonnull;
@@ -75,10 +76,19 @@ public final class ShulkerEvents
 
     @SubscribeEvent
     static void shulkerDying(@Nonnull final PlayerInteractEvent.EntityInteract event) {
-        if(event.getTarget() instanceof EntityShulker) {
+        if(ColoredShulkersCfg.inWorldDying && event.getTarget() instanceof EntityShulker) {
             @Nonnull final ItemStack held = event.getItemStack();
-            if(!held.isEmpty() && SHELL_COLOR_GETTER.containsKey(held.getItem())) {
-                @Nullable final ShulkerType shellColor = SHELL_COLOR_GETTER.get(held.getItem()).apply(held);
+            if(!held.isEmpty()) {
+                @Nullable final Function<ItemStack, ShulkerType> mappedColor = SHELL_COLOR_GETTER.get(held.getItem());
+                @Nullable ShulkerType shellColor = mappedColor != null ? mappedColor.apply(held) : null;
+
+                // Support all dye items (if enabled).
+                if(mappedColor == null && ColoredShulkersCfg.inWorldDyingWithDyes) {
+                    @Nonnull final Optional<EnumDyeColor> dyeColor = DyeUtils.colorFromStack(held);
+                    if(dyeColor.isPresent()) shellColor = ShulkerType.color(dyeColor.get());
+                }
+
+                // Perform shulker coloring.
                 if(shellColor != null && shellColor.canApply((EntityShulker)event.getTarget())) {
                     if(!event.getWorld().isRemote && !event.getEntityPlayer().isCreative()) {
                         if(held.getItem().isDamageable()) held.damageItem(1, event.getEntityPlayer());
@@ -89,13 +99,13 @@ public final class ShulkerEvents
                     event.setCancellationResult(EnumActionResult.SUCCESS);
                     event.setCanceled(true);
 
-                    // Disable shell drops if shell was changed using a shell item.
-                    if(held.getItem() == Items.SHULKER_SHELL || held.getItem() == ColoredShulkers.SHELL)
-                        event.getTarget().getEntityData().setBoolean(ShulkerUtils.DROPS_TAG, true);
+                    // Disable shell drops if shell was changed.
+                    event.getTarget().getEntityData().setBoolean(ShulkerUtils.DROPS_TAG, ColoredShulkersCfg.inWorldDyingNoDrops);
 
                     // Close shulker and play FX.
                     ((EntityShulker)event.getTarget()).updateArmorModifier(0);
                     event.getEntityPlayer().swingArm(event.getHand());
+                    if(!ColoredShulkersCfg.inWorldDyingFX) return;
                     event.getTarget().playSound(ColoredShulkers.SHULKER_DYED, 1, 1);
                     event.getWorld().spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, event.getTarget().posX, event.getTarget().posY + event.getTarget().height / 2, event.getTarget().posZ, 0, 0, 0);
                 }

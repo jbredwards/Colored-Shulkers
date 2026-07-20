@@ -28,8 +28,7 @@ public final class ColoredShulkersCfg
     public static boolean enableDrops = true;
 
     @Config.LangKey("cfg." + Tags.MOD_ID + ".enableEndCity")
-    @Nonnull
-    public static EnableType enableEndCity = EnableType.ENABLED;
+    @Nonnull public static EnableType enableEndCity = EnableType.ENABLED;
 
     @Config.LangKey("cfg." + Tags.MOD_ID + ".enableSpawner")
     @Nonnull public static EnableType enableSpawner = EnableType.DISABLED;
@@ -37,12 +36,33 @@ public final class ColoredShulkersCfg
     @Config.LangKey("cfg." + Tags.MOD_ID + ".enableWorld")
     @Nonnull public static EnableType enableWorld = EnableType.DISABLED;
 
+    @Config.LangKey("cfg." + Tags.MOD_ID + ".inWorldDying")
+    public static boolean inWorldDying = true;
+
+    @Config.LangKey("cfg." + Tags.MOD_ID + ".inWorldDyingFX")
+    public static boolean inWorldDyingFX = false;
+
+    @Config.LangKey("cfg." + Tags.MOD_ID + ".inWorldDyingNoDrops")
+    public static boolean inWorldDyingNoDrops = false;
+
+    @Config.LangKey("cfg." + Tags.MOD_ID + ".inWorldDyingWithDyes")
+    public static boolean inWorldDyingWithDyes = true;
+
     @Config.LangKey("cfg." + Tags.MOD_ID + ".rainbowShellBreaking")
     public static boolean rainbowShellBreaking = true;
 
     @Config.LangKey("cfg." + Tags.MOD_ID + ".rainbowShellXP")
     public static int rainbowShellXP = 55;
 
+    @Config.RequiresMcRestart
+    @Config.LangKey("cfg." + Tags.MOD_ID + ".shellDyingRecipes")
+    public static boolean shellDyingRecipes = true;
+
+    @Config.RequiresMcRestart
+    @Config.LangKey("cfg." + Tags.MOD_ID + ".shellToDyeRecipes")
+    public static boolean shellToDyeRecipes = true;
+
+    @Config.RangeDouble(min = 0, max = 1)
     @Config.LangKey("cfg." + Tags.MOD_ID + ".shulkerChanceRainbow")
     public static double shulkerChanceRainbow = 0.05;
 

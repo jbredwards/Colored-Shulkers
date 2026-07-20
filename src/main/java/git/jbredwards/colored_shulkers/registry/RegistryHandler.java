@@ -4,6 +4,7 @@ import git.jbredwards.colored_shulkers.ColoredShulkers;
 import git.jbredwards.colored_shulkers.ShulkerEvents;
 import git.jbredwards.colored_shulkers.ShulkerUtils;
 import git.jbredwards.colored_shulkers.Tags;
+import git.jbredwards.colored_shulkers.config.ColoredShulkersCfg;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockShulkerBox;
 import net.minecraft.client.renderer.block.model.*;
@@ -81,11 +82,11 @@ final class RegistryHandler
 
         // Shells to dyes.
         extraShellsToDyes();
-        ShulkerEvents.SHELL_TO_DYE.forEach((color, dye) -> event.getRegistry().register(
+        if(ColoredShulkersCfg.shellToDyeRecipes) ShulkerEvents.SHELL_TO_DYE.forEach((color, dye) -> event.getRegistry().register(
                 new ShapelessOreRecipe(null, dye, ShulkerUtils.shellFromColor(color, 1)).setRegistryName("shell_to_dye/" + color)));
 
         // Shell dying.
-        event.getRegistry().registerAll(Arrays.stream(EnumDyeColor.values())
+        if(ColoredShulkersCfg.shellDyingRecipes) event.getRegistry().registerAll(Arrays.stream(EnumDyeColor.values())
                 .map(color -> {
                     @Nonnull final ItemStack result = ShulkerUtils.shellFromColor(color, 1);
                     @Nonnull final ItemStack[] shells = Arrays.stream(EnumDyeColor.values())
