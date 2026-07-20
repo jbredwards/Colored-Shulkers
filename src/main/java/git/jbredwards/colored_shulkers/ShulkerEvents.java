@@ -1,6 +1,7 @@
 package git.jbredwards.colored_shulkers;
 
 import com.google.common.collect.ImmutableMap;
+import git.jbredwards.colored_shulkers.config.ColoredShulkersCfg;
 import git.jbredwards.colored_shulkers.registry.ItemColoredShell;
 import git.jbredwards.colored_shulkers.registry.RainbowShulkerBox;
 import net.minecraft.entity.monster.EntityShulker;
@@ -55,7 +56,7 @@ public final class ShulkerEvents
 
                                     // Disable drops.
                                     if(shulker.getEntityData().getBoolean(ShulkerUtils.DROPS_TAG)) return ItemStack.EMPTY;
-                                    else if(!ColoredShulkers.Cfg.enableDrops) return stack;
+                                    else if(!ColoredShulkersCfg.enableDrops) return stack;
 
                                     // Inject new shulker shell drops.
                                     else if(ShulkerUtils.isRainbow(shulker)) return new ItemStack(ColoredShulkers.SHELL, stack.getCount(), 15);
@@ -104,7 +105,7 @@ public final class ShulkerEvents
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     static void shulkerEgg(@Nonnull final LivingSpawnEvent.SpecialSpawn event) {
-        @Nonnull final ColoredShulkers.Cfg.EnableType cfg = event.getSpawner() == null ? ColoredShulkers.Cfg.enableWorld : ColoredShulkers.Cfg.enableSpawner;
+        @Nonnull final ColoredShulkersCfg.EnableType cfg = event.getSpawner() == null ? ColoredShulkersCfg.enableWorld : ColoredShulkersCfg.enableSpawner;
         if(event.getEntity() instanceof EntityShulker) ShulkerUtils.setRandomColor((EntityShulker)event.getEntity(), event.getWorld().rand, cfg);
     }
 

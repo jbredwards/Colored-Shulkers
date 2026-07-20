@@ -2,6 +2,7 @@ package git.jbredwards.colored_shulkers.registry;
 
 import git.jbredwards.colored_shulkers.ColoredShulkers;
 import git.jbredwards.colored_shulkers.Tags;
+import git.jbredwards.colored_shulkers.config.ColoredShulkersCfg;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
@@ -60,7 +61,7 @@ public class ItemColoredShell extends Item
     public void addInformation(@Nonnull final ItemStack stack, @Nullable final World worldIn, @Nonnull final List<String> tooltip, @Nonnull final ITooltipFlag flagIn) {
         if(stack.getMetadata() == 15) {
             tooltip.add(1, rainbowFormat[RainbowShulkerBox.getTicks(0.00075) % rainbowFormat.length] + I18n.format("color." + Tags.MOD_ID + ".rainbow"));
-            if(ColoredShulkers.Cfg.rainbowShellBreaking) tooltip.add(1, I18n.format("tooltip." + Tags.MOD_ID + ".rainbow_shulker_shell." + (GuiScreen.isShiftKeyDown() ? "shown" : "hidden")));
+            if(ColoredShulkersCfg.rainbowShellBreaking) tooltip.add(1, I18n.format("tooltip." + Tags.MOD_ID + ".rainbow_shulker_shell." + (GuiScreen.isShiftKeyDown() ? "shown" : "hidden")));
         }
     }
 
@@ -73,7 +74,7 @@ public class ItemColoredShell extends Item
     @Nonnull
     @Override
     public ActionResult<ItemStack> onItemRightClick(@Nonnull final World worldIn, @Nonnull final EntityPlayer playerIn, @Nonnull final EnumHand handIn) {
-        if(ColoredShulkers.Cfg.rainbowShellBreaking) {
+        if(ColoredShulkersCfg.rainbowShellBreaking) {
             @Nonnull final ItemStack held = playerIn.getHeldItem(handIn);
             if(!held.isEmpty() && held.getMetadata() == 15) {
                 if(worldIn instanceof WorldServer) {
@@ -84,7 +85,7 @@ public class ItemColoredShell extends Item
                         else playerIn.dropItem(shell, false, false);
                     });
 
-                    if(!(playerIn instanceof FakePlayer)) for(int i = ColoredShulkers.Cfg.rainbowShellXP * consumed; i > 0;) {
+                    if(!(playerIn instanceof FakePlayer)) for(int i = ColoredShulkersCfg.rainbowShellXP * consumed; i > 0;) {
                         final int split = EntityXPOrb.getXPSplit(i);
                         worldIn.spawnEntity(new EntityXPOrb(worldIn, playerIn.posX, playerIn.posY + playerIn.getEyeHeight(), playerIn.posZ, split));
                         i -= split;

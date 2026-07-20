@@ -2,6 +2,7 @@ package git.jbredwards.colored_shulkers.compat;
 
 import git.jbredwards.colored_shulkers.ColoredShulkers;
 import git.jbredwards.colored_shulkers.ShulkerUtils;
+import git.jbredwards.colored_shulkers.config.ColoredShulkersCfg;
 import git.jbredwards.colored_shulkers.registry.ItemColoredShell;
 import io.netty.util.internal.IntegerHolder;
 import jeresources.api.drop.LootDrop;
@@ -33,7 +34,7 @@ public final class JERHandler
 
             JERAPI.getInstance().getMobRegistry().register(shulker, LootTableHelper.toDrops(defaultLootTable).stream()
                     .peek(drop -> {
-                        if(ColoredShulkers.Cfg.enableDrops && drop.item.getItem() == Items.SHULKER_SHELL)
+                        if(ColoredShulkersCfg.enableDrops && drop.item.getItem() == Items.SHULKER_SHELL)
                             drop.item = new ItemStack(ColoredShulkers.SHELL, drop.item.getCount(), meta.value);
                     })
                     .toArray(LootDrop[]::new));

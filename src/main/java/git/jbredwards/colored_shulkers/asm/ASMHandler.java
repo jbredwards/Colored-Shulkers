@@ -1,7 +1,7 @@
 package git.jbredwards.colored_shulkers.asm;
 
-import git.jbredwards.colored_shulkers.ColoredShulkers;
 import git.jbredwards.colored_shulkers.ShulkerUtils;
+import git.jbredwards.colored_shulkers.config.ColoredShulkersCfg;
 import git.jbredwards.colored_shulkers.registry.RainbowShulkerBox;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.monster.EntityShulker;
@@ -120,7 +120,7 @@ public final class ASMHandler implements IFMLLoadingPlugin
 
         public static void applyRandomColor(@Nonnull final EntityShulker shulker) {
             final long posSeed = MathHelper.getCoordinateRandom((int)shulker.posX, (int)shulker.posY, (int)shulker.posZ);
-            ShulkerUtils.setRandomColor(shulker, new Random(posSeed ^ shulker.world.getSeed()), ColoredShulkers.Cfg.enableEndCity);
+            ShulkerUtils.setRandomColor(shulker, new Random(posSeed ^ shulker.world.getSeed()), ColoredShulkersCfg.enableEndCity);
         }
     }
 

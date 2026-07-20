@@ -1,5 +1,6 @@
 package git.jbredwards.colored_shulkers;
 
+import git.jbredwards.colored_shulkers.config.ColoredShulkersCfg;
 import git.jbredwards.colored_shulkers.registry.ItemColoredShell;
 import net.minecraft.entity.monster.EntityShulker;
 import net.minecraft.init.Items;
@@ -63,10 +64,10 @@ public interface ShulkerUtils
         shulker.getEntityData().setBoolean(RAINBOW_TAG, true);
     }
 
-    static void setRandomColor(@Nonnull final EntityShulker shulker, @Nonnull final Random rand, @Nonnull final ColoredShulkers.Cfg.EnableType cfg) {
-        if(cfg != ColoredShulkers.Cfg.EnableType.DISABLED) {
-            if(cfg == ColoredShulkers.Cfg.EnableType.ENABLED && rand.nextDouble() < ColoredShulkers.Cfg.shulkerChanceRainbow) setRainbow(shulker);
-            else setColor(shulker, WeightedRandom.getRandomItem(rand, ColoredShulkers.Cfg.WEIGHTS).color);
+    static void setRandomColor(@Nonnull final EntityShulker shulker, @Nonnull final Random rand, @Nonnull final ColoredShulkersCfg.EnableType cfg) {
+        if(cfg != ColoredShulkersCfg.EnableType.DISABLED) {
+            if(cfg == ColoredShulkersCfg.EnableType.ENABLED && rand.nextDouble() < ColoredShulkersCfg.shulkerChanceRainbow) setRainbow(shulker);
+            else setColor(shulker, WeightedRandom.getRandomItem(rand, ColoredShulkersCfg.WEIGHTS).color);
         }
     }
 }

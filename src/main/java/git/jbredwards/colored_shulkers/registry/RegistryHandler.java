@@ -172,6 +172,10 @@ final class RegistryHandler
                 ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BROWN, new ItemStack(item, 8, 2));
                 ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.WHITE, new ItemStack(item, 8));
             });
+            // Shells to dyes (AA).
+            Optional.ofNullable(Item.getByNameOrId("actuallyadditions:item_misc")).ifPresent(item ->
+                ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLACK, new ItemStack(item, 8, 17))
+            );
             // Shells to dyes (Natura).
             Optional.ofNullable(Item.getByNameOrId("natura:materials")).ifPresent(item ->
                 ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLUE, new ItemStack(item, 8, 8))
