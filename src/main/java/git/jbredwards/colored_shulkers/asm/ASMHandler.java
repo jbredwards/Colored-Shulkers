@@ -1,10 +1,13 @@
 package git.jbredwards.colored_shulkers.asm;
 
+import git.jbredwards.colored_shulkers.ColoredShulkers;
 import git.jbredwards.colored_shulkers.ShulkerUtils;
 import git.jbredwards.colored_shulkers.config.ColoredShulkersCfg;
 import git.jbredwards.colored_shulkers.registry.RainbowShulkerBox;
+import net.minecraft.block.Block;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.monster.EntityShulker;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
@@ -12,10 +15,7 @@ import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -41,6 +41,25 @@ public final class ASMHandler implements IFMLLoadingPlugin
         @Override
         public byte[] transform(@Nullable final String name, @Nullable final String transformedName, @Nullable final byte[] basicClass) {
             if(basicClass == null) return null;
+            else if("net.minecraft.block.BlockShulkerBox".equals(transformedName)) {
+                @Nonnull final ClassNode classNode = new ClassNode();
+                new ClassReader(basicClass).accept(classNode, 0);
+                methods:
+                for(@Nonnull final MethodNode method : classNode.methods) {
+                    if(method.name.equals(FMLLaunchHandler.isDeobfuscatedEnvironment() ? "getBlockByColor" : "func_190952_a")) {
+                        for(@Nonnull final AbstractInsnNode insn : method.instructions.toArray()) {
+                            if(insn instanceof FieldInsnNode && ((FieldInsnNode)insn).name.equals(FMLLaunchHandler.isDeobfuscatedEnvironment() ? "PURPLE_SHULKER_BOX" : "field_190987_dv")) {
+                                method.instructions.insert(insn, new MethodInsnNode(Opcodes.INVOKESTATIC, "git/jbredwards/colored_shulkers/asm/ASMHandler$Hooks", "getPurpleShulkerBox", "(Lnet/minecraft/block/Block;)Lnet/minecraft/block/Block;", false));
+                                break methods;
+                            }
+                        }
+                    }
+                }
+
+                @Nonnull final ClassWriter writer = new ClassWriter(0);
+                classNode.accept(writer);
+                return writer.toByteArray();
+            }
             else if("net.minecraft.client.renderer.entity.RenderShulker".equals(transformedName)) {
                 @Nonnull final ClassNode classNode = new ClassNode();
                 new ClassReader(basicClass).accept(classNode, 0);
@@ -116,11 +135,22 @@ public final class ASMHandler implements IFMLLoadingPlugin
                 final int rgb = RainbowShulkerBox.getRGB();
                 GlStateManager.color((rgb >> 16 & 255) / 255f, (rgb >> 8 & 255) / 255f, (rgb & 255) / 255f);
             }
+            else if(shulker.getEntityData().getBoolean(ShulkerUtils.PURPLE_TAG)) {
+                final int rgb = EnumDyeColor.PURPLE.getColorValue();
+                GlStateManager.color((rgb >> 16 & 255) / 255f, (rgb >> 8 & 255) / 255f, (rgb & 255) / 255f);
+            }
         }
 
         public static void applyRandomColor(@Nonnull final EntityShulker shulker) {
             final long posSeed = MathHelper.getCoordinateRandom((int)shulker.posX, (int)shulker.posY, (int)shulker.posZ);
             ShulkerUtils.setRandomColor(shulker, new Random(posSeed ^ shulker.world.getSeed()), ColoredShulkersCfg.enableEndCity);
+        }
+
+        @Nonnull
+        public static Block getPurpleShulkerBox(@Nonnull final Block oldBox) {
+            try { if(ColoredShulkers.PURPLE_SHULKER_BOX != null) return ColoredShulkers.PURPLE_SHULKER_BOX; }
+            catch(@Nonnull final Throwable ignored) {} // Should never error, but let's be safe.
+            return oldBox;
         }
     }
 

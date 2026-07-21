@@ -4,6 +4,7 @@ import git.jbredwards.colored_shulkers.ColoredShulkers;
 import git.jbredwards.colored_shulkers.ShulkerUtils;
 import git.jbredwards.colored_shulkers.Tags;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockShulkerBox;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelShulker;
@@ -63,11 +64,20 @@ public final class RainbowShulkerBox
     public static class TEISR extends TileEntityItemStackRenderer
     {
         @Nonnull
-        private static final Tile DUMMY = new Tile();
+        private final Tile dummyTile;
+        public TEISR(final boolean rainbow) {
+            dummyTile = new Tile() {
+                @Nonnull
+                @Override
+                public Block getBlockType() {
+                    return rainbow ? ColoredShulkers.RAINBOW_SHULKER_BOX : ColoredShulkers.PURPLE_SHULKER_BOX;
+                }
+            };
+        }
 
         @Override
         public void renderByItem(@Nonnull final ItemStack stack, final float partialTicks) {
-            TileEntityRendererDispatcher.instance.render(DUMMY, 0, 0, 0, 0, partialTicks);
+            TileEntityRendererDispatcher.instance.render(dummyTile, 0, 0, 0, 0, partialTicks);
         }
     }
 
@@ -84,7 +94,7 @@ public final class RainbowShulkerBox
                 // Set the "last color state" so it's the same as the main renderer when that sets its color.
                 GlStateManager.color(1, 1, 1, alpha);
                 // Set the rendered color.
-                final int rgb = getRGB();
+                final int rgb = te.getBlockType() == ColoredShulkers.RAINBOW_SHULKER_BOX ? getRGB() : EnumDyeColor.PURPLE.getColorValue();
                 GL11.glColor4f((rgb >> 16 & 255) / 255f, (rgb >> 8 & 255) / 255f, (rgb & 255) / 255f, alpha);
             }
 
@@ -126,15 +136,21 @@ public final class RainbowShulkerBox
     public static class Sync implements IMessage, IMessageHandler<Sync, IMessage>
     {
         public int id;
+        public boolean rainbow;
+        public boolean purple;
 
         @Override
         public void fromBytes(@Nonnull final ByteBuf buf) {
             id = buf.readInt();
+            rainbow = buf.readBoolean();
+            purple = buf.readBoolean();
         }
 
         @Override
         public void toBytes(@Nonnull final ByteBuf buf) {
             buf.writeInt(id);
+            buf.writeBoolean(rainbow);
+            buf.writeBoolean(purple);
         }
 
         @Nullable
@@ -144,7 +160,10 @@ public final class RainbowShulkerBox
                 @Nullable final World world = Minecraft.getMinecraft().world;
                 if(world != null) {
                     @Nullable final Entity entity = world.getEntityByID(message.id);
-                    if(entity instanceof EntityShulker) ShulkerUtils.setRainbow((EntityShulker)entity);
+                    if(entity instanceof EntityShulker) {
+                        if(message.rainbow) ShulkerUtils.setRainbow((EntityShulker)entity);
+                        else if(message.purple) ShulkerUtils.setColor((EntityShulker)entity, EnumDyeColor.PURPLE);
+                    }
                 }
             });
 

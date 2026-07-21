@@ -26,10 +26,10 @@ public final class JERHandler
 {
     public static void postInit() {
         @Nonnull final LootTable defaultLootTable = LootTableHelper.getManager().getLootTableFromLocation(LootTableList.ENTITIES_SHULKER);
-        for(@Nonnull final IntegerHolder meta = new IntegerHolder(); meta.value < 16; meta.value++) {
+        for(@Nonnull final IntegerHolder meta = new IntegerHolder(); meta.value <= ShulkerUtils.RAINBOW_META; meta.value++) {
             @Nonnull final EntityShulker shulker = new EntityShulker(CompatBase.getWorld());
 
-            if(meta.value == 15) ShulkerUtils.setRainbow(shulker);
+            if(meta.value == ShulkerUtils.RAINBOW_META) ShulkerUtils.setRainbow(shulker);
             else ShulkerUtils.setColor(shulker, ItemColoredShell.byShellDamage(meta.value).orElseThrow(IllegalStateException::new));
 
             JERAPI.getInstance().getMobRegistry().register(shulker, LootTableHelper.toDrops(defaultLootTable).stream()

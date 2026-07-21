@@ -11,8 +11,9 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
-import net.minecraft.item.EnumDyeColor;
+import net.minecraft.init.PotionTypes;
 import net.minecraft.item.Item;
+import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.world.storage.loot.LootTableList;
@@ -47,25 +48,28 @@ public final class ColoredShulkers
     @Nonnull public static final ResourceLocation RAINBOW_SHELL_TABLE = LootTableList.register(new ResourceLocation(Tags.MOD_ID, "rainbow_shell_shatter"));
     @Nonnull public static final SimpleNetworkWrapper WRAPPER = NetworkRegistry.INSTANCE.newSimpleChannel(Tags.MOD_ID);
 
-    public static Block RAINBOW_SHULKER_BOX;
+    public static Block PURPLE_SHULKER_BOX, RAINBOW_SHULKER_BOX;
     public static Item SHELL;
     public static SoundEvent RAINBOW_SHELL_USE, SHULKER_DYED, SHULKER_ENCHANT;
 
     @Mod.EventHandler
     static void init(@Nonnull final FMLInitializationEvent event) {
-        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(Item.getItemFromBlock(RAINBOW_SHULKER_BOX),
-        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.getObject(Item.getItemFromBlock(Blocks.WHITE_SHULKER_BOX)));
-        ShulkerEvents.SHELL_COLOR_GETTER.put(Items.SHULKER_SHELL, stack -> ShulkerEvents.ShulkerType.color(EnumDyeColor.PURPLE));
+        WRAPPER.registerMessage(RainbowShulkerBox.Sync.class, RainbowShulkerBox.Sync.class, 0, Side.CLIENT);
+        dispenseBehavior(PURPLE_SHULKER_BOX);
+        dispenseBehavior(RAINBOW_SHULKER_BOX);
+        // Shulker entity interactions.
+        ShulkerEvents.SHELL_COLOR_GETTER.put(Items.POTIONITEM, stack -> PotionUtils.getPotionFromItem(stack) == PotionTypes.WATER ? ShulkerEvents.ShulkerType.color(null) : null);
+        ShulkerEvents.SHELL_COLOR_GETTER.put(Items.SHULKER_SHELL, stack -> ShulkerEvents.ShulkerType.color(null));
         ShulkerEvents.SHELL_COLOR_GETTER.put(SHELL, stack -> {
-            if(stack.getMetadata() == 15) return ShulkerEvents.ShulkerType.rainbow();
+            if(stack.getMetadata() == ShulkerUtils.RAINBOW_META) return ShulkerEvents.ShulkerType.rainbow();
             else return ShulkerUtils.colorFromShell(stack).map(ShulkerEvents.ShulkerType::color).orElse(null);
         });
-        WRAPPER.registerMessage(RainbowShulkerBox.Sync.class, RainbowShulkerBox.Sync.class, 0, Side.CLIENT);
     }
 
     @Mod.EventHandler
     static void initClient(@Nonnull final FMLInitializationEvent event) {
-        Item.getItemFromBlock(RAINBOW_SHULKER_BOX).setTileEntityItemStackRenderer(new RainbowShulkerBox.TEISR());
+        Item.getItemFromBlock(PURPLE_SHULKER_BOX).setTileEntityItemStackRenderer(new RainbowShulkerBox.TEISR(false));
+        Item.getItemFromBlock(RAINBOW_SHULKER_BOX).setTileEntityItemStackRenderer(new RainbowShulkerBox.TEISR(true));
         ClientRegistry.bindTileEntitySpecialRenderer(RainbowShulkerBox.Tile.class, new RainbowShulkerBox.TESR(new ModelShulker()));
         // Remove "disable" button in mod gui.
         @Nonnull final ModContainer mod = Objects.requireNonNull(Loader.instance().activeModContainer());
@@ -90,5 +94,9 @@ public final class ColoredShulkers
             ConfigManager.sync(Tags.MOD_ID, Config.Type.INSTANCE);
             ColoredShulkersCfg.sync();
         }
+    }
+
+    private static void dispenseBehavior(@Nonnull final Block shulkerBox) {
+        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(Item.getItemFromBlock(shulkerBox), BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.getObject(Item.getItemFromBlock(Blocks.RED_SHULKER_BOX)));
     }
 }

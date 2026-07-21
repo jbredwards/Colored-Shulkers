@@ -379,6 +379,30 @@
           ]
         }
       ]
+    },
+    {
+      "name": "this_loot_table_has_incorrect_names_now_with_the_purple_change",
+      "rolls": 1,
+      "bonus_rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "name": "colored_shulkers:shell",
+          "functions": [
+            {
+              "function": "set_count",
+              "count": {
+                "min": 0,
+                "max": 1
+              }
+            },
+            {
+              "function": "set_data",
+              "data": 15
+            }
+          ]
+        }
+      ]
     }
   ]
 }

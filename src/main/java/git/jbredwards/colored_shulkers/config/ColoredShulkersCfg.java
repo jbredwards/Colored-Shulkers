@@ -6,6 +6,7 @@ import net.minecraft.util.WeightedRandom;
 import net.minecraftforge.common.config.Config;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,6 +67,9 @@ public final class ColoredShulkersCfg
     @Config.LangKey("cfg." + Tags.MOD_ID + ".shulkerChanceRainbow")
     public static double shulkerChanceRainbow = 0.05;
 
+    @Config.LangKey("cfg." + Tags.MOD_ID + ".shulkerWeightColorless")
+    public static int shulkerWeightColorless = 1;
+
     @Config.LangKey("cfg." + Tags.MOD_ID + ".shulkerWeightRed")
     public static int shulkerWeightRed = 1;
 
@@ -119,9 +123,9 @@ public final class ColoredShulkersCfg
     public static final List<ColorEntry> WEIGHTS = new ArrayList<>();
     public static final class ColorEntry extends WeightedRandom.Item
     {
-        @Nonnull
+        @Nullable
         public final EnumDyeColor color;
-        public ColorEntry(@Nonnull final EnumDyeColor colorIn, final int itemWeightIn) {
+        public ColorEntry(@Nullable final EnumDyeColor colorIn, final int itemWeightIn) {
             super(itemWeightIn);
             color = colorIn;
         }
@@ -129,6 +133,7 @@ public final class ColoredShulkersCfg
 
     public static void sync() {
         WEIGHTS.clear();
+        if(shulkerWeightColorless > 0) WEIGHTS.add(new ColorEntry(null, shulkerWeightColorless));
         if(shulkerWeightRed > 0) WEIGHTS.add(new ColorEntry(EnumDyeColor.RED, shulkerWeightRed));
         if(shulkerWeightOrange > 0) WEIGHTS.add(new ColorEntry(EnumDyeColor.ORANGE, shulkerWeightOrange));
         if(shulkerWeightYellow > 0) WEIGHTS.add(new ColorEntry(EnumDyeColor.YELLOW, shulkerWeightYellow));

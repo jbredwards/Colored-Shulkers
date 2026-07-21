@@ -10,9 +10,11 @@ import net.minecraft.block.BlockShulkerBox;
 import net.minecraft.client.renderer.block.model.*;
 import net.minecraft.client.renderer.block.statemap.StateMap;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemShulkerBox;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.Ingredient;
@@ -67,16 +69,16 @@ final class RegistryHandler
         event.getRegistry().register(new ShapedOreRecipe(null, ColoredShulkers.RAINBOW_SHULKER_BOX,
                 "S", "C", "S", 'S', "shellShulkerRainbow", 'C', "chestWood").setRegistryName("box/rainbow"));
         for(@Nonnull final EnumDyeColor color : EnumDyeColor.values()) {
-            if(color != EnumDyeColor.PURPLE) event.getRegistry().register(new ShapedOreRecipe(null,
+            event.getRegistry().register(new ShapedOreRecipe(null,
                     BlockShulkerBox.getBlockByColor(color), "S", "C", "S",
                     'S', "shellShulker" + dyeFromColor(color), 'C', "chestWood")
                     .setRegistryName("box/" + color));
         }
 
-        // Update old shulker box recipe to accept purple shulker shell oredict.
+        // Update old shulker box recipe to accept colorless shulker shell oredict.
         @Nullable final IRecipe shulkerBoxRecipe = event.getRegistry().getValue(new ResourceLocation("purple_shulker_box"));
         if(shulkerBoxRecipe instanceof ShapedRecipes) ((ShapedRecipes)shulkerBoxRecipe).recipeItems.replaceAll(ingredient -> {
-            if(ingredient.test(new ItemStack(Items.SHULKER_SHELL))) return new OreIngredient("shellShulkerPurple");
+            if(ingredient.test(new ItemStack(Items.SHULKER_SHELL))) return new OreIngredient("shellShulkerColorless");
             else return ingredient;
         });
 
@@ -89,8 +91,8 @@ final class RegistryHandler
         if(ColoredShulkersCfg.shellDyingRecipes) event.getRegistry().registerAll(Arrays.stream(EnumDyeColor.values())
                 .map(color -> {
                     @Nonnull final ItemStack result = ShulkerUtils.shellFromColor(color, 1);
-                    @Nonnull final ItemStack[] shells = Arrays.stream(EnumDyeColor.values())
-                            .filter(c -> !c.equals(color))
+                    @Nonnull final ItemStack[] shells = ShulkerUtils.SHELL_COLORS.stream()
+                            .filter(c -> !color.equals(c))
                             .map(c -> ShulkerUtils.shellFromColor(c, 1))
                             .toArray(ItemStack[]::new);
                     return new ShapelessOreRecipe(null, result,
@@ -103,20 +105,25 @@ final class RegistryHandler
     @SubscribeEvent
     static void registerBlocks(@Nonnull final RegistryEvent.Register<Block> event) {
         GameRegistry.registerTileEntity(RainbowShulkerBox.Tile.class, new ResourceLocation(Tags.MOD_ID, "tile"));
+        event.getRegistry().register(ColoredShulkers.PURPLE_SHULKER_BOX = RainbowShulkerBox.Tile.asBlock().setCreativeTab(RainbowShulkerBox.TAB)
+                .setHardness(2).setTranslationKey(Blocks.PURPLE_SHULKER_BOX.getTranslationKey().substring(5)).setRegistryName("purple_shulker_box"));
         event.getRegistry().register(ColoredShulkers.RAINBOW_SHULKER_BOX = RainbowShulkerBox.Tile.asBlock().setCreativeTab(RainbowShulkerBox.TAB)
                 .setHardness(2).setTranslationKey(Tags.MOD_ID + ".rainbow_shulker_box").setRegistryName("rainbow_shulker_box"));
+        Blocks.PURPLE_SHULKER_BOX.setTranslationKey(Tags.MOD_ID + ".colorless_shulker_box");
     }
 
     @SubscribeEvent
     static void registerItems(@Nonnull final RegistryEvent.Register<Item> event) {
-        event.getRegistry().register(RainbowShulkerBox.Tile.asItem().setRegistryName("rainbow_shulker_box"));
         event.getRegistry().register(ColoredShulkers.SHELL = new ItemColoredShell().setCreativeTab(RainbowShulkerBox.TAB).setRegistryName("shell").setTranslationKey("shulkerShell"));
+        event.getRegistry().register(RainbowShulkerBox.Tile.asItem().setRegistryName("rainbow_shulker_box"));
+        event.getRegistry().register(new ItemShulkerBox(ColoredShulkers.PURPLE_SHULKER_BOX).setRegistryName("purple_shulker_box"));
 
         OreDictionary.registerOre("shellShulker", Items.SHULKER_SHELL);
+        OreDictionary.registerOre("shellShulkerColorless", Items.SHULKER_SHELL);
         OreDictionary.registerOre("shellShulker", new ItemStack(ColoredShulkers.SHELL, 1, OreDictionary.WILDCARD_VALUE));
 
         for(@Nonnull final EnumDyeColor color : EnumDyeColor.values()) OreDictionary.registerOre("shellShulker" + dyeFromColor(color), ShulkerUtils.shellFromColor(color, 1));
-        OreDictionary.registerOre("shellShulkerRainbow", new ItemStack(ColoredShulkers.SHELL, 1, 15));
+        OreDictionary.registerOre("shellShulkerRainbow", new ItemStack(ColoredShulkers.SHELL, 1, ShulkerUtils.RAINBOW_META));
     }
 
     @SubscribeEvent
@@ -130,13 +137,22 @@ final class RegistryHandler
     @SideOnly(Side.CLIENT)
     static void registerBakedModels(@Nonnull final ModelBakeEvent event) {
         // TODO: Is there a way through blockstate json to specify "builtin/entity" using forge_marker and provide it a particle texture?
-        @Nonnull final ModelResourceLocation location = new ModelResourceLocation(ColoredShulkers.RAINBOW_SHULKER_BOX.delegate.name(), "normal");
+        @Nonnull final ModelResourceLocation rainbow = new ModelResourceLocation(ColoredShulkers.RAINBOW_SHULKER_BOX.delegate.name(), null);
         @Nonnull final IBakedModel soulSand = event.getModelManager().getModel(new ModelResourceLocation("soul_sand"));
-        event.getModelRegistry().putObject(location, new BuiltInModel(soulSand.getItemCameraTransforms(), ItemOverrideList.NONE) {
+        event.getModelRegistry().putObject(rainbow, new BuiltInModel(soulSand.getItemCameraTransforms(), ItemOverrideList.NONE) {
             @Nonnull
             @Override
             public TextureAtlasSprite getParticleTexture() {
                 return soulSand.getParticleTexture();
+            }
+        });
+        @Nonnull final ModelResourceLocation purple = new ModelResourceLocation(ColoredShulkers.PURPLE_SHULKER_BOX.delegate.name(), null);
+        @Nonnull final TextureAtlasSprite purpleParticle = event.getModelManager().getBlockModelShapes().getTexture(Blocks.WHITE_SHULKER_BOX.getDefaultState());
+        event.getModelRegistry().putObject(purple, new BuiltInModel(soulSand.getItemCameraTransforms(), ItemOverrideList.NONE) {
+            @Nonnull
+            @Override
+            public TextureAtlasSprite getParticleTexture() {
+                return purpleParticle;
             }
         });
     }
@@ -144,17 +160,21 @@ final class RegistryHandler
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
     static void registerModels(@Nonnull final ModelRegistryEvent event) {
+        ModelLoader.setCustomStateMapper(ColoredShulkers.PURPLE_SHULKER_BOX, new StateMap.Builder().ignore(BlockShulkerBox.FACING).build());
+        ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(ColoredShulkers.PURPLE_SHULKER_BOX), 0, new ModelResourceLocation(
+                ColoredShulkers.PURPLE_SHULKER_BOX.delegate.name(), null));
         ModelLoader.setCustomStateMapper(ColoredShulkers.RAINBOW_SHULKER_BOX, new StateMap.Builder().ignore(BlockShulkerBox.FACING).build());
         ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(ColoredShulkers.RAINBOW_SHULKER_BOX), 0, new ModelResourceLocation(
-                ColoredShulkers.RAINBOW_SHULKER_BOX.delegate.name(), "normal"));
-        for(int meta = 0; meta < 16; meta++) ModelLoader.setCustomModelResourceLocation(ColoredShulkers.SHELL, meta, new ModelResourceLocation(
+                ColoredShulkers.RAINBOW_SHULKER_BOX.delegate.name(), null));
+        for(int meta = 0; meta <= ShulkerUtils.RAINBOW_META; meta++) ModelLoader.setCustomModelResourceLocation(ColoredShulkers.SHELL, meta, new ModelResourceLocation(
                 ColoredShulkers.SHELL.delegate.name(), ItemColoredShell.byShellDamage(meta).map(EnumDyeColor::getName).orElse("rainbow")));
     }
 
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
     static void registerColors(@Nonnull final ColorHandlerEvent.Item event) {
-        event.getItemColors().registerItemColorHandler((stack, tintIndex) -> tintIndex == 0 && stack.getMetadata() == 15 ? RainbowShulkerBox.getRGB() : -1, ColoredShulkers.SHELL);
+        event.getItemColors().registerItemColorHandler((stack, tintIndex) -> tintIndex == 0 && stack.getMetadata() == ShulkerUtils.RAINBOW_META ? RainbowShulkerBox.getRGB() : -1, ColoredShulkers.SHELL);
+        event.getBlockColors().registerBlockColorHandler((state, world, pos, tintIndex) -> tintIndex == 0 ? EnumDyeColor.PURPLE.getColorValue() : -1, ColoredShulkers.PURPLE_SHULKER_BOX);
     }
 
     private static void extraShellsToDyes() {

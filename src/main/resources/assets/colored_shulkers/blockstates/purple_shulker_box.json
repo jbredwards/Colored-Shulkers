@@ -1,0 +1,11 @@
+{
+  "__comment": "Handled through code.",
+  "forge_marker": 1,
+  "variants": {
+    "normal": [
+      {
+        "model": "builtin/generated"
+      }
+    ]
+  }
+}

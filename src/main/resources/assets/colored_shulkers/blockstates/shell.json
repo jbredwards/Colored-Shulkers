@@ -20,6 +20,7 @@
         "magenta": [{"textures": {"layer0": "colored_shulkers:items/shulker_shell_magenta"}}],
         "orange": [{"textures": {"layer0": "colored_shulkers:items/shulker_shell_orange"}}],
         "white": [{"textures": {"layer0": "colored_shulkers:items/shulker_shell_white"}}],
-        "rainbow": [{"textures": {"layer0": "colored_shulkers:items/shulker_shell_white"}}]
+        "rainbow": [{"textures": {"layer0": "colored_shulkers:items/shulker_shell_white"}}],
+        "purple": [{"textures": {"layer0": "colored_shulkers:items/shulker_shell_purple"}}]
     }
 }

@@ -9,8 +9,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.WeightedRandom;
 
 import javax.annotation.Nonnull;
-import java.util.Optional;
-import java.util.Random;
+import javax.annotation.Nullable;
+import java.util.*;
 
 /**
  *
@@ -23,19 +23,22 @@ public interface ShulkerUtils
     // ITEM
     // ----
 
+    int RAINBOW_META = 16;
+
+    @Nonnull
+    Set<EnumDyeColor> SHELL_COLORS = Collections.unmodifiableSet(new LinkedHashSet<>(ShulkerEvents.shellColors()));
+
     @Nonnull
     static Optional<EnumDyeColor> colorFromShell(@Nonnull final ItemStack stack) {
-        if(stack.getItem() == Items.SHULKER_SHELL) return Optional.of(EnumDyeColor.PURPLE);
-        else if(stack.getItem() == ColoredShulkers.SHELL) return ItemColoredShell.byShellDamage(stack.getMetadata());
+        if(stack.getItem() == ColoredShulkers.SHELL) return ItemColoredShell.byShellDamage(stack.getMetadata());
         // Invalid shell.
         return Optional.empty();
     }
 
     @Nonnull
-    static ItemStack shellFromColor(@Nonnull final EnumDyeColor color, final int count) {
-        if(color == EnumDyeColor.PURPLE) return new ItemStack(Items.SHULKER_SHELL, count);
-        final int meta = color.getMetadata();
-        return new ItemStack(ColoredShulkers.SHELL, count, meta > EnumDyeColor.PURPLE.getMetadata() ? meta - 1 : meta);
+    static ItemStack shellFromColor(@Nullable final EnumDyeColor color, final int count) {
+        if(color == null) return new ItemStack(Items.SHULKER_SHELL, count);
+        else return new ItemStack(ColoredShulkers.SHELL, count, color.getMetadata());
     }
 
     // ------
@@ -43,15 +46,24 @@ public interface ShulkerUtils
     // ------
 
     @Nonnull
-    String DROPS_TAG = Tags.MOD_ID + ":drops", RAINBOW_TAG = Tags.MOD_ID + ":rainbow";
+    String DROPS_TAG = Tags.MOD_ID + ":drops", PURPLE_TAG = Tags.MOD_ID + ":purple", RAINBOW_TAG = Tags.MOD_ID + ":rainbow";
 
     @Nonnull
-    static EnumDyeColor getColor(@Nonnull final EntityShulker shulker) {
-        return EnumDyeColor.byMetadata(shulker.getDataManager().get(EntityShulker.COLOR));
+    static Optional<EnumDyeColor> getColor(@Nonnull final EntityShulker shulker) {
+        if(shulker.getEntityData().getBoolean(PURPLE_TAG)) return Optional.of(EnumDyeColor.PURPLE);
+        @Nonnull final EnumDyeColor color = EnumDyeColor.byMetadata(shulker.getDataManager().get(EntityShulker.COLOR));
+        return color == EnumDyeColor.PURPLE ? Optional.empty() : Optional.of(color);
     }
 
-    static void setColor(@Nonnull final EntityShulker shulker, @Nonnull final EnumDyeColor color) {
-        shulker.getDataManager().set(EntityShulker.COLOR, (byte)color.getMetadata());
+    static void setColor(@Nonnull final EntityShulker shulker, @Nullable final EnumDyeColor color) {
+        if(color == EnumDyeColor.PURPLE) {
+            shulker.getDataManager().set(EntityShulker.COLOR, (byte)EnumDyeColor.WHITE.getMetadata());
+            shulker.getEntityData().setBoolean(PURPLE_TAG, true);
+        }
+        else {
+            shulker.getDataManager().set(EntityShulker.COLOR, (byte)(color != null ? color : EnumDyeColor.PURPLE).getMetadata());
+            shulker.getEntityData().setBoolean(PURPLE_TAG, false);
+        }
         shulker.getEntityData().setBoolean(RAINBOW_TAG, false);
     }
 
@@ -61,6 +73,7 @@ public interface ShulkerUtils
 
     static void setRainbow(@Nonnull final EntityShulker shulker) {
         shulker.getDataManager().set(EntityShulker.COLOR, (byte)0);
+        shulker.getEntityData().setBoolean(PURPLE_TAG, false);
         shulker.getEntityData().setBoolean(RAINBOW_TAG, true);
     }
 

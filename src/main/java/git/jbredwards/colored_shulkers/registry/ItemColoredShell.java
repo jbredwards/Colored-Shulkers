@@ -1,6 +1,7 @@
 package git.jbredwards.colored_shulkers.registry;
 
 import git.jbredwards.colored_shulkers.ColoredShulkers;
+import git.jbredwards.colored_shulkers.ShulkerUtils;
 import git.jbredwards.colored_shulkers.Tags;
 import git.jbredwards.colored_shulkers.config.ColoredShulkersCfg;
 import net.minecraft.client.gui.GuiScreen;
@@ -41,13 +42,13 @@ public class ItemColoredShell extends Item
 
     @Override
     public void getSubItems(@Nonnull final CreativeTabs tab, @Nonnull final NonNullList<ItemStack> items) {
-        if(isInCreativeTab(tab)) for(int meta = 0; meta < 16; meta++) items.add(new ItemStack(this, 1, meta));
+        if(isInCreativeTab(tab)) for(int meta = 0; meta <= ShulkerUtils.RAINBOW_META; meta++) items.add(new ItemStack(this, 1, meta));
     }
 
     @Nonnull
     public static Optional<EnumDyeColor> byShellDamage(final int meta) {
-        if(meta >= 15) return Optional.empty(); // Invalid shell.
-        return Optional.of(EnumDyeColor.byMetadata(meta >= EnumDyeColor.PURPLE.getMetadata() ? meta + 1 : meta));
+        if(meta > 15) return Optional.empty(); // Invalid shell.
+        return Optional.of(EnumDyeColor.byMetadata(meta));
     }
 
     @Nonnull
@@ -59,7 +60,7 @@ public class ItemColoredShell extends Item
     @SideOnly(Side.CLIENT)
     @Override
     public void addInformation(@Nonnull final ItemStack stack, @Nullable final World worldIn, @Nonnull final List<String> tooltip, @Nonnull final ITooltipFlag flagIn) {
-        if(stack.getMetadata() == 15) {
+        if(stack.getMetadata() == ShulkerUtils.RAINBOW_META) {
             tooltip.add(1, rainbowFormat[RainbowShulkerBox.getTicks(0.00075) % rainbowFormat.length] + I18n.format("color." + Tags.MOD_ID + ".rainbow"));
             if(ColoredShulkersCfg.rainbowShellBreaking) tooltip.add(1, I18n.format("tooltip." + Tags.MOD_ID + ".rainbow_shulker_shell." + (GuiScreen.isShiftKeyDown() ? "shown" : "hidden")));
         }
@@ -68,7 +69,7 @@ public class ItemColoredShell extends Item
     @Nonnull
     @Override
     public EnumRarity getRarity(@Nonnull final ItemStack stack) {
-        return stack.getMetadata() == 15 ? EnumRarity.RARE : super.getRarity(stack);
+        return stack.getMetadata() == ShulkerUtils.RAINBOW_META ? EnumRarity.RARE : super.getRarity(stack);
     }
 
     @Nonnull
@@ -76,7 +77,7 @@ public class ItemColoredShell extends Item
     public ActionResult<ItemStack> onItemRightClick(@Nonnull final World worldIn, @Nonnull final EntityPlayer playerIn, @Nonnull final EnumHand handIn) {
         if(ColoredShulkersCfg.rainbowShellBreaking) {
             @Nonnull final ItemStack held = playerIn.getHeldItem(handIn);
-            if(!held.isEmpty() && held.getMetadata() == 15) {
+            if(!held.isEmpty() && held.getMetadata() == ShulkerUtils.RAINBOW_META) {
                 if(worldIn instanceof WorldServer) {
                     final int consumed = playerIn.isSneaking() ? Math.min(16, held.getCount()) : 1;
                     worldIn.getLootTableManager().getLootTableFromLocation(ColoredShulkers.RAINBOW_SHELL_TABLE).generateLootForPools(worldIn.rand,

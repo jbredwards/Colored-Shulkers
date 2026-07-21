@@ -16,10 +16,13 @@ color.colored_shulkers.silver=%s
 color.colored_shulkers.white=%s
 color.colored_shulkers.yellow=%s
 
+
+
 itemGroup.colored_shulkers.tab=Colored Shulkers
+tile.colored_shulkers.colorless_shulker_box.name=Shulker Box
 tile.colored_shulkers.rainbow_shulker_box.name=Rainbow Shulker Box
 tooltip.colored_shulkers.rainbow_shulker_shell.hidden=§7Hold §bSHIFT§7 for more info
-tooltip.colored_shulkers.rainbow_shulker_shell.shown=May be shattered into many Shulker Shells
+tooltip.colored_shulkers.rainbow_shulker_shell.shown=May be shattered into XP and many Shulker Shells
 
 mod.colored_shulkers.credits=\n- jbredwards: creator and maintainer\n- CleanroomMC: created TemplateDevEnv
 mod.colored_shulkers.description=Adds colored shulkers and colored shulker shells!
