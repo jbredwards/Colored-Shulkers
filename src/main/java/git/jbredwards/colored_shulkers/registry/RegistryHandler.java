@@ -4,6 +4,7 @@ import git.jbredwards.colored_shulkers.ColoredShulkers;
 import git.jbredwards.colored_shulkers.ShulkerEvents;
 import git.jbredwards.colored_shulkers.ShulkerUtils;
 import git.jbredwards.colored_shulkers.Tags;
+import git.jbredwards.colored_shulkers.compat.BookshelfHandler;
 import git.jbredwards.colored_shulkers.config.ColoredShulkersCfg;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockShulkerBox;
@@ -67,18 +68,18 @@ final class RegistryHandler
     static void registerRecipes(@Nonnull final RegistryEvent.Register<IRecipe> event) {
         // New shulker box recipes.
         event.getRegistry().register(new ShapedOreRecipe(null, ColoredShulkers.RAINBOW_SHULKER_BOX,
-                "S", "C", "S", 'S', "shellShulkerRainbow", 'C', "chestWood").setRegistryName("box/rainbow"));
+                "S", "C", "S", 'S', "shulkerShellRainbow", 'C', "chestWood").setRegistryName("box/rainbow"));
         for(@Nonnull final EnumDyeColor color : EnumDyeColor.values()) {
             event.getRegistry().register(new ShapedOreRecipe(null,
                     BlockShulkerBox.getBlockByColor(color), "S", "C", "S",
-                    'S', "shellShulker" + dyeFromColor(color), 'C', "chestWood")
+                    'S', "shulkerShell" + dyeFromColor(color), 'C', "chestWood")
                     .setRegistryName("box/" + color));
         }
 
         // Update old shulker box recipe to accept colorless shulker shell oredict.
         @Nullable final IRecipe shulkerBoxRecipe = event.getRegistry().getValue(new ResourceLocation("purple_shulker_box"));
         if(shulkerBoxRecipe instanceof ShapedRecipes) ((ShapedRecipes)shulkerBoxRecipe).recipeItems.replaceAll(ingredient -> {
-            if(ingredient.test(new ItemStack(Items.SHULKER_SHELL))) return new OreIngredient("shellShulkerColorless");
+            if(ingredient.test(new ItemStack(Items.SHULKER_SHELL))) return new OreIngredient("shulkerShellColorless");
             else return ingredient;
         });
 
@@ -118,12 +119,13 @@ final class RegistryHandler
         event.getRegistry().register(RainbowShulkerBox.Tile.asItem().setRegistryName("rainbow_shulker_box"));
         event.getRegistry().register(new ItemShulkerBox(ColoredShulkers.PURPLE_SHULKER_BOX).setRegistryName("purple_shulker_box"));
 
-        OreDictionary.registerOre("shellShulker", Items.SHULKER_SHELL);
-        OreDictionary.registerOre("shellShulkerColorless", Items.SHULKER_SHELL);
-        OreDictionary.registerOre("shellShulker", new ItemStack(ColoredShulkers.SHELL, 1, OreDictionary.WILDCARD_VALUE));
+        OreDictionary.registerOre("shulkerShell", Items.SHULKER_SHELL);
+        OreDictionary.registerOre("shulkerShellColorless", Items.SHULKER_SHELL);
+        OreDictionary.registerOre("shulkerShell", new ItemStack(ColoredShulkers.SHELL, 1, OreDictionary.WILDCARD_VALUE));
 
-        for(@Nonnull final EnumDyeColor color : EnumDyeColor.values()) OreDictionary.registerOre("shellShulker" + dyeFromColor(color), ShulkerUtils.shellFromColor(color, 1));
-        OreDictionary.registerOre("shellShulkerRainbow", new ItemStack(ColoredShulkers.SHELL, 1, ShulkerUtils.RAINBOW_META));
+        for(@Nonnull final EnumDyeColor color : EnumDyeColor.values()) OreDictionary.registerOre("shulkerShell" + dyeFromColor(color), ShulkerUtils.shellFromColor(color, 1));
+        OreDictionary.registerOre("shulkerShellRainbow", new ItemStack(ColoredShulkers.SHELL, 1, ShulkerUtils.RAINBOW_META));
+        if(Loader.isModLoaded("bookshelf")) BookshelfHandler.registerOres(DYES);
     }
 
     @SubscribeEvent
