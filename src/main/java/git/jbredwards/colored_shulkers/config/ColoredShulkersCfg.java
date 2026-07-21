@@ -63,8 +63,9 @@ public final class ColoredShulkersCfg
     public static boolean shellDyingRecipes = true;
 
     @Config.RequiresMcRestart
+    @Config.RangeInt(min = 0, max = 64)
     @Config.LangKey("cfg." + Tags.MOD_ID + ".shellToDyeRecipes")
-    public static boolean shellToDyeRecipes = true;
+    public static int shellToDyeRecipes = 16;
 
     @Config.RangeDouble(min = 0, max = 1)
     @Config.LangKey("cfg." + Tags.MOD_ID + ".shulkerChanceRainbow")

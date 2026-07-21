@@ -33,6 +33,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.OreIngredient;
 import net.minecraftforge.oredict.ShapedOreRecipe;
@@ -85,8 +86,9 @@ final class RegistryHandler
 
         // Shells to dyes.
         extraShellsToDyes();
-        if(ColoredShulkersCfg.shellToDyeRecipes) ShulkerEvents.SHELL_TO_DYE.forEach((color, dye) -> event.getRegistry().register(
-                new ShapelessOreRecipe(null, dye, ShulkerUtils.shellFromColor(color, 1)).setRegistryName("shell_to_dye/" + color)));
+        if(ColoredShulkersCfg.shellToDyeRecipes > 0) ShulkerEvents.SHELL_TO_DYE.forEach((color, dye) -> event.getRegistry().register(
+                new ShapelessOreRecipe(null, ItemHandlerHelper.copyStackWithSize(dye, Math.min(64, ColoredShulkersCfg.shellToDyeRecipes)),
+                ShulkerUtils.shellFromColor(color, 1), ShulkerUtils.shellFromColor(color, 1)).setRegistryName("shell_to_dye/" + color)));
 
         // Shell dying.
         if(ColoredShulkersCfg.shellDyingRecipes) event.getRegistry().registerAll(Arrays.stream(EnumDyeColor.values())
@@ -101,6 +103,10 @@ final class RegistryHandler
                             .setRegistryName("shell_from_dye/" + color);
                 })
                 .toArray(IRecipe[]::new));
+
+        // Colored shells to colorless.
+        event.getRegistry().registerAll(new ColorlessBoxRecipe().setRegistryName("colorless_box"), new ShapelessOreRecipe(null, Items.SHULKER_SHELL,
+                Ingredient.fromStacks(Arrays.stream(EnumDyeColor.values()).map(color -> ShulkerUtils.shellFromColor(color, 1)).toArray(ItemStack[]::new))).setRegistryName("colorless_shell"));
     }
 
     @SubscribeEvent
@@ -190,18 +196,18 @@ final class RegistryHandler
         else {
             // Shells to dyes (FutureMC).
             Optional.ofNullable(Item.getByNameOrId("futuremc:dye")).ifPresent(item -> {
-                ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLACK, new ItemStack(item, 8, 3));
-                ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLUE, new ItemStack(item, 8, 1));
-                ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BROWN, new ItemStack(item, 8, 2));
-                ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.WHITE, new ItemStack(item, 8));
+                ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLACK, new ItemStack(item, 1, 3));
+                ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLUE, new ItemStack(item, 1, 1));
+                ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BROWN, new ItemStack(item, 1, 2));
+                ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.WHITE, new ItemStack(item, 1));
             });
             // Shells to dyes (AA).
             Optional.ofNullable(Item.getByNameOrId("actuallyadditions:item_misc")).ifPresent(item ->
-                ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLACK, new ItemStack(item, 8, 17))
+                ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLACK, new ItemStack(item, 1, 17))
             );
             // Shells to dyes (Natura).
             Optional.ofNullable(Item.getByNameOrId("natura:materials")).ifPresent(item ->
-                ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLUE, new ItemStack(item, 8, 8))
+                ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLUE, new ItemStack(item, 1, 8))
             );
         }
     }
