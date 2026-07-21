@@ -55,6 +55,9 @@ public final class ColoredShulkersCfg
     @Config.LangKey("cfg." + Tags.MOD_ID + ".rainbowShellXP")
     public static int rainbowShellXP = 55;
 
+    @Config.LangKey("cfg." + Tags.MOD_ID + ".shellColorInTooltip")
+    public static boolean shellColorInTooltip = false;
+
     @Config.RequiresMcRestart
     @Config.LangKey("cfg." + Tags.MOD_ID + ".shellDyingRecipes")
     public static boolean shellDyingRecipes = true;

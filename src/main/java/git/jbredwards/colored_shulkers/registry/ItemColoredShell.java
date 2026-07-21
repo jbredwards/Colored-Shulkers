@@ -5,7 +5,6 @@ import git.jbredwards.colored_shulkers.ShulkerUtils;
 import git.jbredwards.colored_shulkers.Tags;
 import git.jbredwards.colored_shulkers.config.ColoredShulkersCfg;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.item.EntityXPOrb;
@@ -16,6 +15,7 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.loot.LootContext;
@@ -52,18 +52,31 @@ public class ItemColoredShell extends Item
     }
 
     @Nonnull
-    @SideOnly(Side.CLIENT)
-    public static String localizeColor(@Nonnull final EnumDyeColor color) {
-        return I18n.format("color." + Tags.MOD_ID + '.' + color.getTranslationKey(), I18n.format("item.fireworksCharge." + color.getTranslationKey()));
+    public static String localizeColor(@Nonnull final String color) {
+        return I18n.translateToLocalFormatted("color." + Tags.MOD_ID + '.' + color, I18n.translateToLocal("item.fireworksCharge." + color));
+    }
+
+    @Nonnull
+    @Override
+    public String getItemStackDisplayName(@Nonnull final ItemStack stack) {
+        @Nullable final String color = stack.getMetadata() == ShulkerUtils.RAINBOW_META ? "rainbow" : byShellDamage(stack.getMetadata()).map(EnumDyeColor::getTranslationKey).orElse(null);
+        if(color == null || ColoredShulkersCfg.shellColorInTooltip) return super.getItemStackDisplayName(stack);
+
+        @Nonnull final String colorKey = getTranslationKey(stack) + '.' + color + ".name";
+        if(I18n.canTranslate(colorKey)) return I18n.translateToLocal(colorKey);
+
+        // Generic name using color lang values.
+        return I18n.translateToLocalFormatted(Tags.MOD_ID + '.' + getTranslationKey(stack) + ".name", super.getItemStackDisplayName(stack), localizeColor(color));
     }
 
     @SideOnly(Side.CLIENT)
     @Override
     public void addInformation(@Nonnull final ItemStack stack, @Nullable final World worldIn, @Nonnull final List<String> tooltip, @Nonnull final ITooltipFlag flagIn) {
         if(stack.getMetadata() == ShulkerUtils.RAINBOW_META) {
-            tooltip.add(1, rainbowFormat[RainbowShulkerBox.getTicks(0.00075) % rainbowFormat.length] + I18n.format("color." + Tags.MOD_ID + ".rainbow"));
-            if(ColoredShulkersCfg.rainbowShellBreaking) tooltip.add(1, I18n.format("tooltip." + Tags.MOD_ID + ".rainbow_shulker_shell." + (GuiScreen.isShiftKeyDown() ? "shown" : "hidden")));
+            if(ColoredShulkersCfg.rainbowShellBreaking) tooltip.add(I18n.translateToLocal("tooltip." + Tags.MOD_ID + ".rainbow_shulker_shell." + (GuiScreen.isShiftKeyDown() ? ColoredShulkersCfg.rainbowShellXP > 0 ? "shownXp" : "shown" : "hidden")));
+            if(ColoredShulkersCfg.shellColorInTooltip) tooltip.add(rainbowFormat[RainbowShulkerBox.getTicks(0.00075) % rainbowFormat.length] + localizeColor("rainbow"));
         }
+        else if(ColoredShulkersCfg.shellColorInTooltip) ShulkerUtils.colorFromShell(stack).ifPresent(color -> tooltip.add(localizeColor(color.getTranslationKey())));
     }
 
     @Nonnull
