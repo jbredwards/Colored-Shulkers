@@ -61,6 +61,15 @@ public final class RainbowShulkerBox
     }
 
     @SideOnly(Side.CLIENT)
+    public static void setRGB(@Nonnull final Block shulkerBox, final float alpha) {
+        // Set the "last color state" so it's the same as the main renderer when that sets its color.
+        GlStateManager.color(1, 1, 1, alpha);
+        // Set the rendered color.
+        final int rgb = shulkerBox == ColoredShulkers.RAINBOW_SHULKER_BOX ? getRGB() : EnumDyeColor.PURPLE.getColorValue();
+        GL11.glColor4f((rgb >> 16 & 255) / 255f, (rgb >> 8 & 255) / 255f, (rgb & 255) / 255f, alpha);
+    }
+
+    @SideOnly(Side.CLIENT)
     public static class TEISR extends TileEntityItemStackRenderer
     {
         @Nonnull
@@ -90,14 +99,7 @@ public final class RainbowShulkerBox
 
         @Override
         public void render(@Nonnull final TileEntityShulkerBox te, final double x, final double y, final double z, final float partialTicks, final int destroyStage, final float alpha) {
-            if(destroyStage < 0) {
-                // Set the "last color state" so it's the same as the main renderer when that sets its color.
-                GlStateManager.color(1, 1, 1, alpha);
-                // Set the rendered color.
-                final int rgb = te.getBlockType() == ColoredShulkers.RAINBOW_SHULKER_BOX ? getRGB() : EnumDyeColor.PURPLE.getColorValue();
-                GL11.glColor4f((rgb >> 16 & 255) / 255f, (rgb >> 8 & 255) / 255f, (rgb & 255) / 255f, alpha);
-            }
-
+            if(destroyStage < 0) setRGB(te.getBlockType(), alpha);
             super.render(te, x, y, z, partialTicks, destroyStage, alpha);
             GL11.glColor4f(1, 1, 1, 1);
         }

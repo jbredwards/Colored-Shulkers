@@ -1,6 +1,8 @@
 package git.jbredwards.colored_shulkers;
 
 import git.jbredwards.colored_shulkers.compat.JERHandler;
+import git.jbredwards.colored_shulkers.compat.ShulkerBaublesHandler;
+import git.jbredwards.colored_shulkers.compat.ShulkerDropsTwoHandler;
 import git.jbredwards.colored_shulkers.config.ColoredShulkersCfg;
 import git.jbredwards.colored_shulkers.registry.RainbowShulkerBox;
 import net.minecraft.block.Block;
@@ -26,6 +28,7 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.*;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
@@ -53,11 +56,16 @@ public final class ColoredShulkers
     public static SoundEvent RAINBOW_SHELL_USE, SHULKER_DYED, SHULKER_ENCHANT;
 
     @Mod.EventHandler
-    static void init(@Nonnull final FMLInitializationEvent event) {
+    static void preInit(@Nonnull final FMLPreInitializationEvent event) {
+        if(Loader.isModLoaded("baubleshulkerboxes")) ShulkerBaublesHandler.preInit();
         WRAPPER.registerMessage(RainbowShulkerBox.Sync.class, RainbowShulkerBox.Sync.class, 0, Side.CLIENT);
         dispenseBehavior(PURPLE_SHULKER_BOX);
         dispenseBehavior(RAINBOW_SHULKER_BOX);
-        // Shulker entity interactions.
+    }
+
+    @Mod.EventHandler
+    static void init(@Nonnull final FMLInitializationEvent event) {
+        if(Loader.isModLoaded("shulkerdropstwo")) ShulkerDropsTwoHandler.init();
         ShulkerEvents.SHELL_COLOR_GETTER.put(Items.POTIONITEM, stack -> PotionUtils.getPotionFromItem(stack) == PotionTypes.WATER ? ShulkerEvents.ShulkerType.color(null) : null);
         ShulkerEvents.SHELL_COLOR_GETTER.put(Items.SHULKER_SHELL, stack -> ShulkerEvents.ShulkerType.color(null));
         ShulkerEvents.SHELL_COLOR_GETTER.put(SHELL, stack -> {
