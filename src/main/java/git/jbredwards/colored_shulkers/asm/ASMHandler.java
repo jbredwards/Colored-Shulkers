@@ -2,12 +2,15 @@ package git.jbredwards.colored_shulkers.asm;
 
 import git.jbredwards.colored_shulkers.ColoredShulkers;
 import git.jbredwards.colored_shulkers.ShulkerUtils;
+import git.jbredwards.colored_shulkers.Tags;
 import git.jbredwards.colored_shulkers.config.ColoredShulkersCfg;
 import git.jbredwards.colored_shulkers.registry.RainbowShulkerBox;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.monster.EntityShulker;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
+import net.minecraft.item.ItemStack;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
@@ -31,6 +34,8 @@ import java.util.function.Predicate;
  * @author jbred
  *
  */
+@IFMLLoadingPlugin.SortingIndex(1001)
+@IFMLLoadingPlugin.Name(Tags.MOD_NAME + " Plugin")
 public final class ASMHandler implements IFMLLoadingPlugin
 {
     @Nonnull
@@ -45,9 +50,13 @@ public final class ASMHandler implements IFMLLoadingPlugin
         public byte[] transform(@Nullable final String name, @Nullable final String transformedName, @Nullable final byte[] basicClass) {
             if(basicClass == null || transformedName == null) return basicClass;
             else switch(transformedName) {
+                // Vanilla:
                 case "net.minecraft.block.BlockShulkerBox": return transformBlockShulkerBox(basicClass);
                 case "net.minecraft.client.renderer.entity.RenderShulker": return transformRenderShulker(basicClass);
                 case "net.minecraft.world.gen.structure.StructureEndCityPieces$CityTemplate": return transformCityTemplate(basicClass);
+                // Modded:
+                case "com.zephaniahnoah.shulkertooltip.ShulkerToolTip$EventManager": return transformShulkerTooltip(basicClass);
+                case "vazkii.quark.client.feature.ShulkerBoxTooltip": return transformShulkerBoxTooltip(basicClass);
                 default: return basicClass;
             }
         }
@@ -115,6 +124,36 @@ public final class ASMHandler implements IFMLLoadingPlugin
             });
         }
 
+        @Nonnull
+        private static byte[] transformShulkerTooltip(@Nonnull final byte[] basicClass) {
+            return transformClass(basicClass, transformMethod(method -> method.name.equals("event"), (method, insn) -> {
+                if(insn instanceof MethodInsnNode && ((MethodInsnNode)insn).name.equals(FMLLaunchHandler.isDeobfuscatedEnvironment() ? "getMetadata" : "func_77960_j")) {
+                    method.instructions.insertBefore(insn, new VarInsnNode(Opcodes.ALOAD, 0));
+                    method.instructions.insertBefore(insn, new VarInsnNode(Opcodes.ALOAD, 0));
+                    method.instructions.insertBefore(insn, new FieldInsnNode(Opcodes.GETFIELD, "com/zephaniahnoah/shulkertooltip/ShulkerToolTip$EventManager", "color", "[F"));
+                    method.instructions.insertBefore(insn, new VarInsnNode(Opcodes.ALOAD, 3));
+                    method.instructions.insertBefore(insn, new MethodInsnNode(Opcodes.INVOKESTATIC, "git/jbredwards/colored_shulkers/asm/ASMHandler$Hooks", "getColor", "([FLnet/minecraft/item/ItemStack;)[F", false));
+                    method.instructions.insertBefore(insn, new FieldInsnNode(Opcodes.PUTFIELD, "com/zephaniahnoah/shulkertooltip/ShulkerToolTip$EventManager", "color", "[F"));
+                    return true;
+                }
+
+                return false;
+            }));
+        }
+
+        @Nonnull
+        private static byte[] transformShulkerBoxTooltip(@Nonnull final byte[] basicClass) {
+            return transformClass(basicClass, transformMethod(method -> method.name.equals("renderTooltip"), (method, insn) -> {
+                if(insn instanceof MethodInsnNode && ((MethodInsnNode)insn).name.equals("renderTooltipBackground")) {
+                    method.instructions.insertBefore(insn, new VarInsnNode(Opcodes.ALOAD, 5));
+                    method.instructions.insertBefore(insn, new MethodInsnNode(Opcodes.INVOKESTATIC, "git/jbredwards/colored_shulkers/asm/ASMHandler$Hooks", "getColor", "(ILnet/minecraft/item/ItemStack;)I", false));
+                    return true;
+                }
+
+                return false;
+            }));
+        }
+
         // ----
         // Util
         // ----
@@ -161,6 +200,19 @@ public final class ASMHandler implements IFMLLoadingPlugin
         public static void applyRandomColor(@Nonnull final EntityShulker shulker) {
             final long posSeed = MathHelper.getCoordinateRandom((int)shulker.posX, (int)shulker.posY, (int)shulker.posZ);
             ShulkerUtils.setRandomColor(shulker, new Random(posSeed ^ shulker.world.getSeed()), ColoredShulkersCfg.enableEndCity);
+        }
+
+        public static int getColor(final int oldColor, @Nonnull final ItemStack currentBox) {
+            @Nullable final Block asBlock = Block.getBlockFromItem(currentBox.getItem());
+            if(asBlock == ColoredShulkers.PURPLE_SHULKER_BOX) return EnumDyeColor.PURPLE.getColorValue();
+            else if(asBlock == ColoredShulkers.RAINBOW_SHULKER_BOX) return RainbowShulkerBox.getRGB();
+            else return asBlock == Blocks.PURPLE_SHULKER_BOX ? 0xBD8FBD : oldColor;
+        }
+
+        @Nonnull
+        public static float[] getColor(@Nonnull final float[] oldColor, @Nonnull final ItemStack currentBox) {
+            final int color = getColor(MathHelper.rgb(oldColor[0], oldColor[1], oldColor[2]), currentBox);
+            return new float[] {(color >> 16 & 255) / 255f, (color >> 8 & 255) / 255f, (color & 255) / 255f};
         }
 
         @Nonnull
