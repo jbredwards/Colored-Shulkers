@@ -17,5 +17,14 @@
         "name": "entity.lightning.impact"
       }
     ]
+  },
+  "entity.shulker.enchant": {
+    "subtitle": "subtitle.colored_shulkers.entity.shulker.enchant",
+    "sounds": [
+      {
+        "type": "event",
+        "name": "block.enchantment_table.use"
+      }
+    ]
   }
 }

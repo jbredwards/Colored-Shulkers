@@ -22,6 +22,9 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.BiPredicate;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  *
@@ -40,31 +43,43 @@ public final class ASMHandler implements IFMLLoadingPlugin
         @Nullable
         @Override
         public byte[] transform(@Nullable final String name, @Nullable final String transformedName, @Nullable final byte[] basicClass) {
-            if(basicClass == null) return null;
-            else if("net.minecraft.block.BlockShulkerBox".equals(transformedName)) {
-                @Nonnull final ClassNode classNode = new ClassNode();
-                new ClassReader(basicClass).accept(classNode, 0);
-                methods:
-                for(@Nonnull final MethodNode method : classNode.methods) {
-                    if(method.name.equals(FMLLaunchHandler.isDeobfuscatedEnvironment() ? "getBlockByColor" : "func_190952_a")) {
-                        for(@Nonnull final AbstractInsnNode insn : method.instructions.toArray()) {
-                            if(insn instanceof FieldInsnNode && ((FieldInsnNode)insn).name.equals(FMLLaunchHandler.isDeobfuscatedEnvironment() ? "PURPLE_SHULKER_BOX" : "field_190987_dv")) {
-                                method.instructions.insert(insn, new MethodInsnNode(Opcodes.INVOKESTATIC, "git/jbredwards/colored_shulkers/asm/ASMHandler$Hooks", "getPurpleShulkerBox", "(Lnet/minecraft/block/Block;)Lnet/minecraft/block/Block;", false));
-                                break methods;
-                            }
-                        }
-                    }
+            if(basicClass == null || transformedName == null) return basicClass;
+            else switch(transformedName) {
+                case "net.minecraft.block.BlockShulkerBox": return transformBlockShulkerBox(basicClass);
+                case "net.minecraft.client.renderer.entity.RenderShulker": return transformRenderShulker(basicClass);
+                case "net.minecraft.world.gen.structure.StructureEndCityPieces$CityTemplate": return transformCityTemplate(basicClass);
+                default: return basicClass;
+            }
+        }
+
+        @Nonnull
+        private static byte[] transformBlockShulkerBox(@Nonnull final byte[] basicClass) {
+            return transformClass(basicClass, transformMethod(method -> method.name.equals(FMLLaunchHandler.isDeobfuscatedEnvironment() ? "getBlockByColor" : "func_190952_a"), (method, insn) -> {
+                if(insn instanceof FieldInsnNode && ((FieldInsnNode)insn).name.equals(FMLLaunchHandler.isDeobfuscatedEnvironment() ? "PURPLE_SHULKER_BOX" : "field_190987_dv")) {
+                    method.instructions.insert(insn, new MethodInsnNode(Opcodes.INVOKESTATIC, "git/jbredwards/colored_shulkers/asm/ASMHandler$Hooks", "getPurpleShulkerBox", "(Lnet/minecraft/block/Block;)Lnet/minecraft/block/Block;", false));
+                    return true;
                 }
 
-                @Nonnull final ClassWriter writer = new ClassWriter(0);
-                classNode.accept(writer);
-                return writer.toByteArray();
-            }
-            else if("net.minecraft.client.renderer.entity.RenderShulker".equals(transformedName)) {
-                @Nonnull final ClassNode classNode = new ClassNode();
-                new ClassReader(basicClass).accept(classNode, 0);
-                classNode.methods.removeIf(method -> method.name.equals(FMLLaunchHandler.isDeobfuscatedEnvironment() ? "renderModel" : "func_77036_a"));
+                return false;
+            }));
+        }
 
+        @Nonnull
+        private static byte[] transformCityTemplate(@Nonnull final byte[] basicClass) {
+            return transformClass(basicClass, transformMethod(method -> method.name.equals(FMLLaunchHandler.isDeobfuscatedEnvironment() ? "handleDataMarker" : "func_186175_a"), (method, insn) -> {
+                if(insn instanceof MethodInsnNode && ((MethodInsnNode)insn).name.equals(FMLLaunchHandler.isDeobfuscatedEnvironment() ? "spawnEntity" : "func_72838_d")) {
+                    method.instructions.insert(insn, new MethodInsnNode(Opcodes.INVOKESTATIC, "git/jbredwards/colored_shulkers/asm/ASMHandler$Hooks", "applyRandomColor", "(Lnet/minecraft/entity/monster/EntityShulker;)V", false));
+                    method.instructions.insert(insn, insn.getPrevious().clone(Collections.emptyMap()));
+                    return true;
+                }
+
+                return false;
+            }));
+        }
+
+        @Nonnull
+        private static byte[] transformRenderShulker(@Nonnull final byte[] basicClass) {
+            return transformClass(basicClass, classNode -> {
                 @Nonnull final MethodNode generic = new MethodNode(Opcodes.ACC_PROTECTED | Opcodes.ACC_BRIDGE | Opcodes.ACC_SYNTHETIC, FMLLaunchHandler.isDeobfuscatedEnvironment() ? "renderModel" : "func_77036_a", "(Lnet/minecraft/entity/EntityLivingBase;FFFFFF)V", null, null);
                 generic.visitVarInsn(Opcodes.ALOAD, 0);
                 generic.visitVarInsn(Opcodes.ALOAD, 1);
@@ -97,33 +112,35 @@ public final class ASMHandler implements IFMLLoadingPlugin
                 typed.visitMethodInsn(Opcodes.INVOKESTATIC, "net/minecraft/client/renderer/GlStateManager", FMLLaunchHandler.isDeobfuscatedEnvironment() ? "color" : "func_179124_c", "(FFF)V", false);
                 typed.visitInsn(Opcodes.RETURN);
                 classNode.methods.add(typed);
+            });
+        }
 
-                @Nonnull final ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-                classNode.accept(writer);
-                return writer.toByteArray();
-            }
-            else if("net.minecraft.world.gen.structure.StructureEndCityPieces$CityTemplate".equals(transformedName)) {
-                @Nonnull final ClassNode classNode = new ClassNode();
-                new ClassReader(basicClass).accept(classNode, 0);
-                methods:
+        // ----
+        // Util
+        // ----
+
+        @Nonnull
+        private static byte[] transformClass(@Nonnull final byte[] basicClass, @Nonnull final Consumer<ClassNode> action) {
+            @Nonnull final ClassNode classNode = new ClassNode();
+            new ClassReader(basicClass).accept(classNode, 0);
+            action.accept(classNode);
+
+            @Nonnull final ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+            classNode.accept(writer);
+            return writer.toByteArray();
+        }
+
+        @Nonnull
+        private static Consumer<ClassNode> transformMethod(@Nonnull final Predicate<MethodNode> target, @Nonnull final BiPredicate<MethodNode, AbstractInsnNode> action) {
+            return classNode -> {
                 for(@Nonnull final MethodNode method : classNode.methods) {
-                    if(method.name.equals(FMLLaunchHandler.isDeobfuscatedEnvironment() ? "handleDataMarker" : "func_186175_a")) {
+                    if(target.test(method)) {
                         for(@Nonnull final AbstractInsnNode insn : method.instructions.toArray()) {
-                            if(insn instanceof MethodInsnNode && ((MethodInsnNode)insn).name.equals(FMLLaunchHandler.isDeobfuscatedEnvironment() ? "spawnEntity" : "func_72838_d")) {
-                                method.instructions.insert(insn, new MethodInsnNode(Opcodes.INVOKESTATIC, "git/jbredwards/colored_shulkers/asm/ASMHandler$Hooks", "applyRandomColor", "(Lnet/minecraft/entity/monster/EntityShulker;)V", false));
-                                method.instructions.insert(insn, insn.getPrevious().clone(Collections.emptyMap()));
-                                break methods;
-                            }
+                            if(action.test(method, insn)) return;
                         }
                     }
                 }
-
-                @Nonnull final ClassWriter writer = new ClassWriter(0);
-                classNode.accept(writer);
-                return writer.toByteArray();
-            }
-
-            return basicClass;
+            };
         }
     }
 
