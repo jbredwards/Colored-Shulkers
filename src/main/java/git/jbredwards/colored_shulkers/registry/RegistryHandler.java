@@ -1,11 +1,11 @@
 package git.jbredwards.colored_shulkers.registry;
 
 import git.jbredwards.colored_shulkers.ColoredShulkers;
-import git.jbredwards.colored_shulkers.ShulkerEvents;
 import git.jbredwards.colored_shulkers.ShulkerUtils;
 import git.jbredwards.colored_shulkers.Tags;
 import git.jbredwards.colored_shulkers.compat.BookshelfHandler;
 import git.jbredwards.colored_shulkers.config.ColoredShulkersCfg;
+import git.jbredwards.colored_shulkers.dying.ShulkerDying;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockShulkerBox;
 import net.minecraft.client.renderer.block.model.*;
@@ -86,7 +86,7 @@ final class RegistryHandler
 
         // Shells to dyes.
         extraShellsToDyes();
-        if(ColoredShulkersCfg.shellToDyeRecipes > 0) ShulkerEvents.SHELL_TO_DYE.forEach((color, dye) -> event.getRegistry().register(
+        if(ColoredShulkersCfg.shellToDyeRecipes > 0) ShulkerDying.SHELL_TO_DYE.forEach((color, dye) -> event.getRegistry().register(
                 new ShapelessOreRecipe(null, ItemHandlerHelper.copyStackWithSize(dye, Math.min(64, ColoredShulkersCfg.shellToDyeRecipes)),
                 ShulkerUtils.shellFromColor(color, 1), ShulkerUtils.shellFromColor(color, 1)).setRegistryName("shell_to_dye/" + color)));
 
@@ -112,7 +112,7 @@ final class RegistryHandler
     @SubscribeEvent
     static void registerBlocks(@Nonnull final RegistryEvent.Register<Block> event) {
         GameRegistry.registerTileEntity(RainbowShulkerBox.Tile.class, new ResourceLocation(Tags.MOD_ID, "tile"));
-        event.getRegistry().register(ColoredShulkers.PURPLE_SHULKER_BOX = RainbowShulkerBox.Tile.asBlock().setCreativeTab(RainbowShulkerBox.TAB)
+        event.getRegistry().register(ColoredShulkers.PURPLE_SHULKER_BOX.setCreativeTab(RainbowShulkerBox.TAB)
                 .setHardness(2).setTranslationKey(Blocks.PURPLE_SHULKER_BOX.getTranslationKey().substring(5)).setRegistryName("purple_shulker_box"));
         event.getRegistry().register(ColoredShulkers.RAINBOW_SHULKER_BOX = RainbowShulkerBox.Tile.asBlock().setCreativeTab(RainbowShulkerBox.TAB)
                 .setHardness(2).setTranslationKey(Tags.MOD_ID + ".rainbow_shulker_box").setRegistryName("rainbow_shulker_box"));
@@ -188,26 +188,26 @@ final class RegistryHandler
     private static void extraShellsToDyes() {
         // Shells to dyes (BOP).
         if(Loader.isModLoaded("biomesoplenty")) {
-            Optional.ofNullable(Item.getByNameOrId("biomesoplenty:black_dye")).ifPresent(item -> ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLACK, new ItemStack(item, 8)));
-            Optional.ofNullable(Item.getByNameOrId("biomesoplenty:blue_dye")).ifPresent(item -> ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLUE, new ItemStack(item, 8)));
-            Optional.ofNullable(Item.getByNameOrId("biomesoplenty:brown_dye")).ifPresent(item -> ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BROWN, new ItemStack(item, 8)));
-            Optional.ofNullable(Item.getByNameOrId("biomesoplenty:white_dye")).ifPresent(item -> ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.WHITE, new ItemStack(item, 8)));
+            Optional.ofNullable(Item.getByNameOrId("biomesoplenty:black_dye")).ifPresent(item -> ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLACK, new ItemStack(item, 8)));
+            Optional.ofNullable(Item.getByNameOrId("biomesoplenty:blue_dye")).ifPresent(item -> ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLUE, new ItemStack(item, 8)));
+            Optional.ofNullable(Item.getByNameOrId("biomesoplenty:brown_dye")).ifPresent(item -> ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BROWN, new ItemStack(item, 8)));
+            Optional.ofNullable(Item.getByNameOrId("biomesoplenty:white_dye")).ifPresent(item -> ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.WHITE, new ItemStack(item, 8)));
         }
         else {
             // Shells to dyes (FutureMC).
             Optional.ofNullable(Item.getByNameOrId("futuremc:dye")).ifPresent(item -> {
-                ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLACK, new ItemStack(item, 1, 3));
-                ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLUE, new ItemStack(item, 1, 1));
-                ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BROWN, new ItemStack(item, 1, 2));
-                ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.WHITE, new ItemStack(item, 1));
+                ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLACK, new ItemStack(item, 1, 3));
+                ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLUE, new ItemStack(item, 1, 1));
+                ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BROWN, new ItemStack(item, 1, 2));
+                ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.WHITE, new ItemStack(item, 1));
             });
             // Shells to dyes (AA).
             Optional.ofNullable(Item.getByNameOrId("actuallyadditions:item_misc")).ifPresent(item ->
-                ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLACK, new ItemStack(item, 1, 17))
+                    ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLACK, new ItemStack(item, 1, 17))
             );
             // Shells to dyes (Natura).
             Optional.ofNullable(Item.getByNameOrId("natura:materials")).ifPresent(item ->
-                ShulkerEvents.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLUE, new ItemStack(item, 1, 8))
+                    ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLUE, new ItemStack(item, 1, 8))
             );
         }
     }

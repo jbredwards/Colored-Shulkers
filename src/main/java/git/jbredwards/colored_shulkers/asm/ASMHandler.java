@@ -217,9 +217,8 @@ public final class ASMHandler implements IFMLLoadingPlugin
 
         @Nonnull
         public static Block getPurpleShulkerBox(@Nonnull final Block oldBox) {
-            try { if(ColoredShulkers.PURPLE_SHULKER_BOX != null) return ColoredShulkers.PURPLE_SHULKER_BOX; }
-            catch(@Nonnull final Throwable ignored) {} // Should never error, but let's be safe.
-            return oldBox;
+            if(ColoredShulkers.PURPLE_SHULKER_BOX != null) return ColoredShulkers.PURPLE_SHULKER_BOX;
+            else return ColoredShulkers.PURPLE_SHULKER_BOX = RainbowShulkerBox.Tile.asBlock();
         }
     }
 

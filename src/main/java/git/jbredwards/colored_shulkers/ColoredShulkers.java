@@ -4,6 +4,7 @@ import git.jbredwards.colored_shulkers.compat.JERHandler;
 import git.jbredwards.colored_shulkers.compat.ShulkerBaublesHandler;
 import git.jbredwards.colored_shulkers.compat.ShulkerDropsTwoHandler;
 import git.jbredwards.colored_shulkers.config.ColoredShulkersCfg;
+import git.jbredwards.colored_shulkers.dying.ShulkerDyeableAction;
 import git.jbredwards.colored_shulkers.registry.RainbowShulkerBox;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDispenser;
@@ -59,18 +60,18 @@ public final class ColoredShulkers
     static void preInit(@Nonnull final FMLPreInitializationEvent event) {
         if(Loader.isModLoaded("baubleshulkerboxes")) ShulkerBaublesHandler.preInit();
         WRAPPER.registerMessage(RainbowShulkerBox.Sync.class, RainbowShulkerBox.Sync.class, 0, Side.CLIENT);
-        dispenseBehavior(PURPLE_SHULKER_BOX);
+        dispenseBehavior(Blocks.PURPLE_SHULKER_BOX);
         dispenseBehavior(RAINBOW_SHULKER_BOX);
     }
 
     @Mod.EventHandler
     static void init(@Nonnull final FMLInitializationEvent event) {
         if(Loader.isModLoaded("shulkerdropstwo")) ShulkerDropsTwoHandler.init();
-        ShulkerEvents.SHELL_COLOR_GETTER.put(Items.POTIONITEM, stack -> PotionUtils.getPotionFromItem(stack) == PotionTypes.WATER ? ShulkerEvents.ShulkerType.color(null) : null);
-        ShulkerEvents.SHELL_COLOR_GETTER.put(Items.SHULKER_SHELL, stack -> ShulkerEvents.ShulkerType.color(null));
-        ShulkerEvents.SHELL_COLOR_GETTER.put(SHELL, stack -> {
-            if(stack.getMetadata() == ShulkerUtils.RAINBOW_META) return ShulkerEvents.ShulkerType.rainbow();
-            else return ShulkerUtils.colorFromShell(stack).map(ShulkerEvents.ShulkerType::color).orElse(null);
+        ShulkerDyeableAction.SHELL_COLOR_GETTER.put(Items.POTIONITEM, stack -> PotionUtils.getPotionFromItem(stack) == PotionTypes.WATER ? ShulkerDyeableAction.washing() : null);
+        ShulkerDyeableAction.SHELL_COLOR_GETTER.put(Items.SHULKER_SHELL, stack -> ShulkerDyeableAction.color(null));
+        ShulkerDyeableAction.SHELL_COLOR_GETTER.put(SHELL, stack -> {
+            if(stack.getMetadata() == ShulkerUtils.RAINBOW_META) return ShulkerDyeableAction.rainbow();
+            else return ShulkerUtils.colorFromShell(stack).map(ShulkerDyeableAction::color).orElse(null);
         });
     }
 

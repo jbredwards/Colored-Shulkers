@@ -113,7 +113,7 @@ public final class RainbowShulkerBox
         }
 
         @Nonnull
-        static BlockShulkerBox asBlock() {
+        public static BlockShulkerBox asBlock() {
             return new BlockShulkerBox(EnumDyeColor.WHITE) {
                 @Nonnull
                 @Override

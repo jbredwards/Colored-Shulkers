@@ -1,7 +1,9 @@
 package git.jbredwards.colored_shulkers;
 
+import com.google.common.collect.BiMap;
 import git.jbredwards.colored_shulkers.config.ColoredShulkersCfg;
 import git.jbredwards.colored_shulkers.registry.ItemColoredShell;
+import net.minecraft.block.Block;
 import net.minecraft.entity.monster.EntityShulker;
 import net.minecraft.init.Items;
 import net.minecraft.item.EnumDyeColor;
@@ -10,7 +12,9 @@ import net.minecraft.util.WeightedRandom;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Optional;
+import java.util.Random;
+import java.util.Set;
 
 /**
  *
@@ -25,8 +29,8 @@ public interface ShulkerUtils
 
     int RAINBOW_META = 16;
 
-    @Nonnull
-    Set<EnumDyeColor> SHELL_COLORS = Collections.unmodifiableSet(new LinkedHashSet<>(ShulkerEvents.shellColors()));
+    @Nonnull Set<EnumDyeColor> SHELL_COLORS = ShulkerEvents.shellColors();
+    @Nonnull BiMap<EnumDyeColor, Block> SHULKER_BOXES = ShulkerEvents.shulkerBoxes();
 
     @Nonnull
     static Optional<EnumDyeColor> colorFromShell(@Nonnull final ItemStack stack) {
