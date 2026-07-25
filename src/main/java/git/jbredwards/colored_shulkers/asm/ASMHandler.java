@@ -57,6 +57,7 @@ public final class ASMHandler implements IFMLLoadingPlugin
                 // Modded:
                 case "com.zephaniahnoah.shulkertooltip.ShulkerToolTip$EventManager": return transformShulkerTooltip(basicClass);
                 case "vazkii.quark.client.feature.ShulkerBoxTooltip": return transformShulkerBoxTooltip(basicClass);
+                case "vazkii.quark.management.client.gui.GuiButtonShulker": return transformShulkerBoxSortButtons(basicClass);
                 default: return basicClass;
             }
         }
@@ -122,6 +123,20 @@ public final class ASMHandler implements IFMLLoadingPlugin
                 typed.visitInsn(Opcodes.RETURN);
                 classNode.methods.add(typed);
             });
+        }
+
+        @Nonnull
+        private static byte[] transformShulkerBoxSortButtons(@Nonnull final byte[] basicClass) {
+            return transformClass(basicClass, transformMethod(method -> method.name.equals("drawChest"), (method, insn) -> {
+                if(insn.getOpcode() == Opcodes.ISTORE && ((VarInsnNode)insn).var == 6) {
+                    method.instructions.insertBefore(insn, new VarInsnNode(Opcodes.ALOAD, 3));
+                    method.instructions.insertBefore(insn, new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/minecraft/tileentity/TileEntity", FMLLaunchHandler.isDeobfuscatedEnvironment() ? "getBlockType" : "func_145838_q", "()Lnet/minecraft/block/Block;", false));
+                    method.instructions.insertBefore(insn, new MethodInsnNode(Opcodes.INVOKESTATIC, "git/jbredwards/colored_shulkers/asm/ASMHandler$Hooks", "getColor", "(ILnet/minecraft/block/Block;)I", false));
+                    return true;
+                }
+
+                return false;
+            }));
         }
 
         @Nonnull
@@ -202,11 +217,14 @@ public final class ASMHandler implements IFMLLoadingPlugin
             ShulkerUtils.setRandomColor(shulker, new Random(posSeed ^ shulker.world.getSeed()), ColoredShulkersCfg.enableEndCity);
         }
 
+        public static int getColor(final int oldColor, @Nullable final Block block) {
+            if(block == ColoredShulkers.PURPLE_SHULKER_BOX) return EnumDyeColor.PURPLE.getColorValue();
+            else if(block == ColoredShulkers.RAINBOW_SHULKER_BOX) return RainbowShulkerBox.getRGB();
+            else return block == Blocks.PURPLE_SHULKER_BOX ? 0xBD8FBD : oldColor;
+        }
+
         public static int getColor(final int oldColor, @Nonnull final ItemStack currentBox) {
-            @Nullable final Block asBlock = Block.getBlockFromItem(currentBox.getItem());
-            if(asBlock == ColoredShulkers.PURPLE_SHULKER_BOX) return EnumDyeColor.PURPLE.getColorValue();
-            else if(asBlock == ColoredShulkers.RAINBOW_SHULKER_BOX) return RainbowShulkerBox.getRGB();
-            else return asBlock == Blocks.PURPLE_SHULKER_BOX ? 0xBD8FBD : oldColor;
+            return getColor(oldColor, Block.getBlockFromItem(currentBox.getItem()));
         }
 
         @Nonnull

@@ -29,8 +29,8 @@ public interface ShulkerUtils
 
     int RAINBOW_META = 16;
 
-    @Nonnull Set<EnumDyeColor> SHELL_COLORS = ShulkerEvents.shellColors();
     @Nonnull BiMap<EnumDyeColor, Block> SHULKER_BOXES = ShulkerEvents.shulkerBoxes();
+    @Nonnull Set<EnumDyeColor> SHELL_COLORS = ShulkerEvents.shellColors();
 
     @Nonnull
     static Optional<EnumDyeColor> colorFromShell(@Nonnull final ItemStack stack) {
