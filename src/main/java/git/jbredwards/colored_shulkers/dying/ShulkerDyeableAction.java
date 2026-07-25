@@ -4,7 +4,6 @@ import git.jbredwards.colored_shulkers.ColoredShulkers;
 import git.jbredwards.colored_shulkers.config.ColoredShulkersCfg;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
-import net.minecraft.init.SoundEvents;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -123,7 +122,7 @@ public interface ShulkerDyeableAction
                     world.spawnParticle(EnumParticleTypes.WATER_SPLASH, MathHelper.nextDouble(world.rand, box.minX, box.maxX), box.maxY, MathHelper.nextDouble(world.rand, box.minZ, box.maxZ), 0, 0, 0);
                 }
 
-                world.playSound(null, box.minX + (box.maxX - box.minX) / 2, box.minY + (box.maxY - box.minY) / 2, box.minZ + (box.maxZ - box.minZ) / 2, SoundEvents.ENTITY_GENERIC_SPLASH, SoundCategory.BLOCKS, 1, 1);
+                world.playSound(null, box.minX + (box.maxX - box.minX) / 2, box.minY + (box.maxY - box.minY) / 2, box.minZ + (box.maxZ - box.minZ) / 2, ColoredShulkers.SHULKER_WASH, SoundCategory.BLOCKS, 1, 1);
             }
         };
     }

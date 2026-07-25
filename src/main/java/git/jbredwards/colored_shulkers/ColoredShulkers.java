@@ -54,7 +54,7 @@ public final class ColoredShulkers
 
     public static Block PURPLE_SHULKER_BOX, RAINBOW_SHULKER_BOX;
     public static Item SHELL;
-    public static SoundEvent RAINBOW_SHELL_USE, SHULKER_DYED, SHULKER_ENCHANT;
+    public static SoundEvent RAINBOW_SHELL_USE, SHULKER_DYED, SHULKER_ENCHANT, SHULKER_WASH;
 
     @Mod.EventHandler
     static void preInit(@Nonnull final FMLPreInitializationEvent event) {

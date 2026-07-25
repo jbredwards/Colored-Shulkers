@@ -138,7 +138,8 @@ final class RegistryHandler
     static void registerSounds(@Nonnull final RegistryEvent.Register<SoundEvent> event) {
         event.getRegistry().registerAll(ColoredShulkers.RAINBOW_SHELL_USE = new SoundEvent(new ResourceLocation(Tags.MOD_ID, "item.rainbow_shell.use")).setRegistryName("item.rainbow_shell.use"),
                                         ColoredShulkers.SHULKER_DYED = new SoundEvent(new ResourceLocation(Tags.MOD_ID, "entity.shulker.dyed")).setRegistryName("entity.shulker.dyed"),
-                                        ColoredShulkers.SHULKER_ENCHANT = new SoundEvent(new ResourceLocation(Tags.MOD_ID, "entity.shulker.enchant")).setRegistryName("entity.shulker.enchant"));
+                                        ColoredShulkers.SHULKER_ENCHANT = new SoundEvent(new ResourceLocation(Tags.MOD_ID, "entity.shulker.enchant")).setRegistryName("entity.shulker.enchant"),
+                                        ColoredShulkers.SHULKER_WASH = new SoundEvent(new ResourceLocation(Tags.MOD_ID, "entity.shulker.wash")).setRegistryName("entity.shulker.wash"));
     }
 
     @SubscribeEvent

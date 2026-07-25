@@ -26,5 +26,14 @@
         "name": "block.enchantment_table.use"
       }
     ]
+  },
+  "entity.shulker.wash": {
+    "subtitle": "subtitle.colored_shulkers.entity.shulker.wash",
+    "sounds": [
+      {
+        "type": "event",
+        "name": "entity.generic.splash"
+      }
+    ]
   }
 }
