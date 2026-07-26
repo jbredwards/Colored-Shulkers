@@ -20,6 +20,7 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.storage.loot.*;
 import net.minecraft.world.storage.loot.conditions.LootCondition;
+import net.minecraft.world.storage.loot.conditions.RandomChance;
 import net.minecraft.world.storage.loot.functions.LootFunction;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
@@ -72,6 +73,11 @@ final class ShulkerEvents
                 });
             });
         }
+        else if(ColoredShulkersCfg.endCityBeetrootSoupChance > 0 && LootTableList.CHESTS_END_CITY_TREASURE.equals(event.getName())) {
+            @Nonnull final LootCondition condition = new RandomChance(ColoredShulkersCfg.endCityBeetrootSoupChance);
+            @Nonnull final LootEntry entry = new LootEntryItem(Items.BEETROOT_SOUP, 1, 1, new LootFunction[0], new LootCondition[0], "main");
+            event.getTable().addPool(new LootPool(new LootEntry[] {entry}, new LootCondition[] {condition}, new RandomValueRange(1), new RandomValueRange(0), Tags.MOD_ID + ":soup"));
+        }
     }
 
     @SubscribeEvent
@@ -116,14 +122,6 @@ final class ShulkerEvents
             message.purple = event.getTarget().getEntityData().getBoolean(ShulkerUtils.PURPLE_TAG);
             if(message.rainbow || message.purple) ColoredShulkers.WRAPPER.sendTo(message, (EntityPlayerMP)event.getEntityPlayer());
         }
-    }
-
-    @Nonnull
-    static Set<EnumDyeColor> shellColors() {
-        @Nonnull final List<EnumDyeColor> colors = new ArrayList<>();
-        colors.add(null);
-        colors.addAll(Arrays.asList(EnumDyeColor.values()));
-        return Collections.unmodifiableSet(new LinkedHashSet<>(colors));
     }
 
     @Nonnull

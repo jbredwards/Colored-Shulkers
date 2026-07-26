@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.block.statemap.StateMap;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemShulkerBox;
@@ -20,6 +21,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.ShapedRecipes;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraftforge.client.event.ColorHandlerEvent;
@@ -86,15 +88,28 @@ final class RegistryHandler
 
         // Shells to dyes.
         extraShellsToDyes();
-        if(ColoredShulkersCfg.shellToDyeRecipes > 0) ShulkerDying.SHELL_TO_DYE.forEach((color, dye) -> event.getRegistry().register(
-                new ShapelessOreRecipe(null, ItemHandlerHelper.copyStackWithSize(dye, Math.min(64, ColoredShulkersCfg.shellToDyeRecipes)),
-                ShulkerUtils.shellFromColor(color, 1), ShulkerUtils.shellFromColor(color, 1)).setRegistryName("shell_to_dye/" + color)));
+        if(ColoredShulkersCfg.shellToDyeRecipes > 0) {
+            ShulkerDying.SHELL_TO_DYE.forEach((color, dye) -> event.getRegistry().register(new ShapelessOreRecipe(null,
+            ItemHandlerHelper.copyStackWithSize(dye, Math.min(64, ColoredShulkersCfg.shellToDyeRecipes)), Items.BOWL, ShulkerUtils.shellFromColor(color, 1)) {
+                @Nonnull
+                @Override
+                public NonNullList<ItemStack> getRemainingItems(@Nonnull final InventoryCrafting inv) {
+                    @Nonnull final NonNullList<ItemStack> ret = NonNullList.withSize(inv.getSizeInventory(), ItemStack.EMPTY);
+                    for(int i = 0; i < ret.size(); i++) {
+                        @Nonnull final ItemStack remaining = inv.getStackInSlot(i);
+                        if(remaining.getItem() != Items.SHULKER_SHELL && remaining.getItem() != ColoredShulkers.SHELL) ret.set(i, ItemHandlerHelper.copyStackWithSize(remaining, 1));
+                    }
+
+                    return ret;
+                }
+            }.setRegistryName("shell_to_dye/" + color)));
+        }
 
         // Shell dying.
         if(ColoredShulkersCfg.shellDyingRecipes) event.getRegistry().registerAll(Arrays.stream(EnumDyeColor.values())
                 .map(color -> {
                     @Nonnull final ItemStack result = ShulkerUtils.shellFromColor(color, 1);
-                    @Nonnull final ItemStack[] shells = ShulkerUtils.SHELL_COLORS.stream()
+                    @Nonnull final ItemStack[] shells = ShulkerUtils.SHULKER_BOXES.keySet().stream()
                             .filter(c -> !color.equals(c))
                             .map(c -> ShulkerUtils.shellFromColor(c, 1))
                             .toArray(ItemStack[]::new);

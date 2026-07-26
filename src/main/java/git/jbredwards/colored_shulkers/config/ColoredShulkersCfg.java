@@ -37,6 +37,11 @@ public final class ColoredShulkersCfg
     @Config.LangKey("cfg." + Tags.MOD_ID + ".enableWorld")
     @Nonnull public static EnableType enableWorld = EnableType.DISABLED;
 
+    @Config.RequiresMcRestart
+    @Config.RangeDouble(min = 0, max = 1)
+    @Config.LangKey("cfg." + Tags.MOD_ID + ".endCityBeetrootSoupChance")
+    public static float endCityBeetrootSoupChance = 0;
+
     @Config.LangKey("cfg." + Tags.MOD_ID + ".inWorldDying")
     public static boolean inWorldDying = true;
 
@@ -65,7 +70,7 @@ public final class ColoredShulkersCfg
     @Config.RequiresMcRestart
     @Config.RangeInt(min = 0, max = 64)
     @Config.LangKey("cfg." + Tags.MOD_ID + ".shellToDyeRecipes")
-    public static int shellToDyeRecipes = 16;
+    public static int shellToDyeRecipes = 8;
 
     @Config.RangeDouble(min = 0, max = 1)
     @Config.LangKey("cfg." + Tags.MOD_ID + ".shulkerChanceRainbow")

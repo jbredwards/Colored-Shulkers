@@ -14,7 +14,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.Random;
-import java.util.Set;
 
 /**
  *
@@ -29,8 +28,8 @@ public interface ShulkerUtils
 
     int RAINBOW_META = 16;
 
-    @Nonnull BiMap<EnumDyeColor, Block> SHULKER_BOXES = ShulkerEvents.shulkerBoxes();
-    @Nonnull Set<EnumDyeColor> SHELL_COLORS = ShulkerEvents.shellColors();
+    @Nonnull
+    BiMap<EnumDyeColor, Block> SHULKER_BOXES = ShulkerEvents.shulkerBoxes();
 
     @Nonnull
     static Optional<EnumDyeColor> colorFromShell(@Nonnull final ItemStack stack) {
