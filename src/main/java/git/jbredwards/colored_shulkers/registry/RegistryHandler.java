@@ -215,15 +215,21 @@ final class RegistryHandler
                 ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLACK, new ItemStack(item, 1, 3));
                 ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLUE, new ItemStack(item, 1, 1));
                 ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BROWN, new ItemStack(item, 1, 2));
-                ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.WHITE, new ItemStack(item, 1));
+                ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.WHITE, new ItemStack(item, 1, 0));
+            });
+            // Shells to dyes (Quark).
+            Optional.ofNullable(Item.getByNameOrId("quark:root_dye")).ifPresent(item -> {
+                ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLACK, new ItemStack(item, 1, 1));
+                ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLUE, new ItemStack(item, 1, 0));
+                ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.WHITE, new ItemStack(item, 1, 2));
             });
             // Shells to dyes (AA).
             Optional.ofNullable(Item.getByNameOrId("actuallyadditions:item_misc")).ifPresent(item ->
-                    ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLACK, new ItemStack(item, 1, 17))
+                ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLACK, new ItemStack(item, 1, 17))
             );
             // Shells to dyes (Natura).
             Optional.ofNullable(Item.getByNameOrId("natura:materials")).ifPresent(item ->
-                    ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLUE, new ItemStack(item, 1, 8))
+                ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLUE, new ItemStack(item, 1, 8))
             );
         }
     }
