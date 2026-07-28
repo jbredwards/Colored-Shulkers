@@ -90,9 +90,22 @@ public final class ShulkerDying
         return false;
     }
 
+    @Nonnull
+    public static String dyeFromColor(@Nonnull final EnumDyeColor color) {
+        return DYES[color.getDyeDamage()];
+    }
+
+    @Nonnull
+    public static String shellFromColor(@Nonnull final EnumDyeColor color) {
+        return "shulkerShell" + dyeFromColor(color);
+    }
+
     static void shrinkAndGive(@Nonnull final EntityPlayer player, @Nonnull final EnumHand hand, @Nonnull final ItemStack held, @Nonnull final ItemStack toGive) {
         held.shrink(1);
         if(held.isEmpty()) player.setHeldItem(hand, toGive);
         else ItemHandlerHelper.giveItemToPlayer(player, toGive);
     }
+
+    @Nonnull
+    private static final String[] DYES = { "Black", "Red", "Green", "Brown", "Blue", "Purple", "Cyan", "LightGray", "Gray", "Pink", "Lime", "Yellow", "LightBlue", "Magenta", "Orange", "White" };
 }

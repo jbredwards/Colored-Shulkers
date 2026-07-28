@@ -1,6 +1,7 @@
 package git.jbredwards.colored_shulkers.compat;
 
 import git.jbredwards.colored_shulkers.ColoredShulkers;
+import git.jbredwards.colored_shulkers.dying.ShulkerDying;
 import net.darkhax.bookshelf.BookshelfConfig;
 import net.darkhax.bookshelf.util.OreDictUtils;
 import net.minecraft.block.BlockShulkerBox;
@@ -17,11 +18,10 @@ import javax.annotation.Nonnull;
  */
 public class BookshelfHandler
 {
-    public static void registerOres(@Nonnull final String[] dyes) {
+    public static void registerOres() {
         if(BookshelfConfig.oreDictShulker) {
-            for(int i = 0; i < dyes.length; i++) OreDictionary.registerOre(
-                    OreDictUtils.SHULKER_BOX + dyes[i],
-                    BlockShulkerBox.getBlockByColor(EnumDyeColor.byDyeDamage(i)));
+            for(@Nonnull final EnumDyeColor color : EnumDyeColor.values()) OreDictionary.registerOre(
+                    OreDictUtils.SHULKER_BOX + ShulkerDying.dyeFromColor(color), BlockShulkerBox.getBlockByColor(color));
 
             OreDictionary.registerOre(OreDictUtils.CHEST, ColoredShulkers.PURPLE_SHULKER_BOX);
             OreDictionary.registerOre(OreDictUtils.CHEST, ColoredShulkers.RAINBOW_SHULKER_BOX);

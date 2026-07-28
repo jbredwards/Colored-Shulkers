@@ -37,6 +37,16 @@ dependencies {
     compileOnly rfg.deobf('curse.maven:just-enough-resources-240630:2728585')
     compileOnly rfg.deobf('curse.maven:quark-243121:2924091')
     compileOnly rfg.deobf('curse.maven:shulker-drops-two-302548:3414428')
+    // Optional compatibility (grinding recipes)
+    compileOnly rfg.deobf('curse.maven:actually-additions-228404:3117927')
+    compileOnly rfg.deobf('curse.maven:applied-energistics-2-223794:2747063')
+    compileOnly rfg.deobf('curse.maven:extrautils2-225561:2678374')
+    compileOnly rfg.deobf('curse.maven:immersive-engineering-231951:2974106')
+    compileOnly rfg.deobf('curse.maven:industrialcraft-242638:3838713')
+    compileOnly rfg.deobf('curse.maven:mekanism-268560:2835175')
+    compileOnly rfg.deobf('curse.maven:nuclearcraft-226254:8213196')
+    compileOnly rfg.deobf('curse.maven:roots-246183:5193525')
+    compileOnly rfg.deobf('curse.maven:thermal-expansion-69163:2926431')
 
     // Include StripLatestForgeRequirements by default for the dev env, saves everyone a hassle
     runtimeOnly 'com.cleanroommc:strip-latest-forge-requirements:1.0'

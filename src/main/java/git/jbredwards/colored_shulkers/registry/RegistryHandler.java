@@ -4,6 +4,7 @@ import git.jbredwards.colored_shulkers.ColoredShulkers;
 import git.jbredwards.colored_shulkers.ShulkerUtils;
 import git.jbredwards.colored_shulkers.Tags;
 import git.jbredwards.colored_shulkers.compat.BookshelfHandler;
+import git.jbredwards.colored_shulkers.compat.GrindingRecipes;
 import git.jbredwards.colored_shulkers.config.ColoredShulkersCfg;
 import git.jbredwards.colored_shulkers.dying.ShulkerDying;
 import net.minecraft.block.Block;
@@ -31,6 +32,7 @@ import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
@@ -54,19 +56,6 @@ import java.util.Optional;
 @Mod.EventBusSubscriber(modid = Tags.MOD_ID)
 final class RegistryHandler
 {
-    @Nonnull
-    static final String[] DYES = {
-            "Black", "Red", "Green", "Brown",
-            "Blue", "Purple", "Cyan", "LightGray",
-            "Gray", "Pink", "Lime", "Yellow",
-            "LightBlue", "Magenta", "Orange", "White"
-    };
-
-    @Nonnull
-    static String dyeFromColor(@Nonnull final EnumDyeColor color) {
-        return DYES[color.getDyeDamage()];
-    }
-
     @SubscribeEvent
     static void registerRecipes(@Nonnull final RegistryEvent.Register<IRecipe> event) {
         // New shulker box recipes.
@@ -75,7 +64,7 @@ final class RegistryHandler
         for(@Nonnull final EnumDyeColor color : EnumDyeColor.values()) {
             event.getRegistry().register(new ShapedOreRecipe(null,
                     BlockShulkerBox.getBlockByColor(color), "S", "C", "S",
-                    'S', "shulkerShell" + dyeFromColor(color), 'C', "chestWood")
+                    'S', ShulkerDying.shellFromColor(color), 'C', "chestWood")
                     .setRegistryName("box/" + color));
         }
 
@@ -89,8 +78,10 @@ final class RegistryHandler
         // Shells to dyes.
         extraShellsToDyes();
         if(ColoredShulkersCfg.shellToDyeRecipes > 0) {
+            @Nullable final Item pestleAndMortar = Item.getByNameOrId("botania:pestleandmortar");
+            @Nonnull final Ingredient bowl = pestleAndMortar != null ? Ingredient.fromItems(pestleAndMortar, Items.BOWL) : Ingredient.fromItem(Items.BOWL);
             ShulkerDying.SHELL_TO_DYE.forEach((color, dye) -> event.getRegistry().register(new ShapelessOreRecipe(null,
-            ItemHandlerHelper.copyStackWithSize(dye, Math.min(64, ColoredShulkersCfg.shellToDyeRecipes)), Items.BOWL, ShulkerUtils.shellFromColor(color, 1)) {
+            ItemHandlerHelper.copyStackWithSize(dye, Math.min(64, ColoredShulkersCfg.shellToDyeRecipes)), bowl, ShulkerDying.shellFromColor(color)) {
                 @Nonnull
                 @Override
                 public NonNullList<ItemStack> getRemainingItems(@Nonnull final InventoryCrafting inv) {
@@ -114,7 +105,7 @@ final class RegistryHandler
                             .map(c -> ShulkerUtils.shellFromColor(c, 1))
                             .toArray(ItemStack[]::new);
                     return new ShapelessOreRecipe(null, result,
-                            "dye" + dyeFromColor(color), Ingredient.fromStacks(shells))
+                            "dye" + ShulkerDying.dyeFromColor(color), Ingredient.fromStacks(shells))
                             .setRegistryName("shell_from_dye/" + color);
                 })
                 .toArray(IRecipe[]::new));
@@ -122,6 +113,11 @@ final class RegistryHandler
         // Colored shells to colorless.
         event.getRegistry().registerAll(new ColorlessBoxRecipe().setRegistryName("colorless_box"), new ShapelessOreRecipe(null, Items.SHULKER_SHELL,
                 Ingredient.fromStacks(Arrays.stream(EnumDyeColor.values()).map(color -> ShulkerUtils.shellFromColor(color, 1)).toArray(ItemStack[]::new))).setRegistryName("colorless_shell"));
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    static void registerGrindingRecipes(@Nonnull final RegistryEvent.Register<IRecipe> event) {
+        GrindingRecipes.registerAll();
     }
 
     @SubscribeEvent
@@ -144,9 +140,9 @@ final class RegistryHandler
         OreDictionary.registerOre("shulkerShellColorless", Items.SHULKER_SHELL);
         OreDictionary.registerOre("shulkerShell", new ItemStack(ColoredShulkers.SHELL, 1, OreDictionary.WILDCARD_VALUE));
 
-        for(@Nonnull final EnumDyeColor color : EnumDyeColor.values()) OreDictionary.registerOre("shulkerShell" + dyeFromColor(color), ShulkerUtils.shellFromColor(color, 1));
+        for(@Nonnull final EnumDyeColor color : EnumDyeColor.values()) OreDictionary.registerOre(ShulkerDying.shellFromColor(color), ShulkerUtils.shellFromColor(color, 1));
         OreDictionary.registerOre("shulkerShellRainbow", new ItemStack(ColoredShulkers.SHELL, 1, ShulkerUtils.RAINBOW_META));
-        if(Loader.isModLoaded("bookshelf")) BookshelfHandler.registerOres(DYES);
+        if(Loader.isModLoaded("bookshelf")) BookshelfHandler.registerOres();
     }
 
     @SubscribeEvent
@@ -226,6 +222,10 @@ final class RegistryHandler
             // Shells to dyes (AA).
             Optional.ofNullable(Item.getByNameOrId("actuallyadditions:item_misc")).ifPresent(item ->
                 ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLACK, new ItemStack(item, 1, 17))
+            );
+            // Shells to dyes (XU).
+            Optional.ofNullable(Item.getByNameOrId("extrautils2:ingredients")).ifPresent(item ->
+                ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLUE, new ItemStack(item, 1, 14))
             );
             // Shells to dyes (Natura).
             Optional.ofNullable(Item.getByNameOrId("natura:materials")).ifPresent(item ->
