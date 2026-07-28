@@ -28,14 +28,17 @@ public final class ColoredShulkersCfg
     @Config.LangKey("cfg." + Tags.MOD_ID + ".enableDrops")
     public static boolean enableDrops = true;
 
+    @Nonnull
     @Config.LangKey("cfg." + Tags.MOD_ID + ".enableEndCity")
-    @Nonnull public static EnableType enableEndCity = EnableType.ENABLED;
+    public static EnableType enableEndCity = EnableType.ENABLED;
 
+    @Nonnull
     @Config.LangKey("cfg." + Tags.MOD_ID + ".enableSpawner")
-    @Nonnull public static EnableType enableSpawner = EnableType.DISABLED;
+    public static EnableType enableSpawner = EnableType.DISABLED;
 
+    @Nonnull
     @Config.LangKey("cfg." + Tags.MOD_ID + ".enableWorld")
-    @Nonnull public static EnableType enableWorld = EnableType.DISABLED;
+    public static EnableType enableWorld = EnableType.DISABLED;
 
     @Config.RequiresMcRestart
     @Config.RangeDouble(min = 0, max = 1)
@@ -74,7 +77,7 @@ public final class ColoredShulkersCfg
 
     @Config.RangeDouble(min = 0, max = 1)
     @Config.LangKey("cfg." + Tags.MOD_ID + ".shulkerChanceRainbow")
-    public static double shulkerChanceRainbow = 0.05;
+    public static double shulkerChanceRainbow = 0.01;
 
     @Config.LangKey("cfg." + Tags.MOD_ID + ".shulkerWeightColorless")
     public static int shulkerWeightColorless = 1;

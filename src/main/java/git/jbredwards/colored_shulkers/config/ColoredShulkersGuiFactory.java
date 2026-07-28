@@ -4,7 +4,6 @@ import git.jbredwards.colored_shulkers.Tags;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.fml.client.DefaultGuiFactory;
 import net.minecraftforge.fml.client.config.GuiConfig;
 import net.minecraftforge.fml.client.config.GuiConfigEntries;
@@ -26,7 +25,7 @@ public final class ColoredShulkersGuiFactory extends DefaultGuiFactory
     @Nonnull
     @Override
     public GuiScreen createConfigGui(@Nonnull final GuiScreen parentScreen) {
-        return new GuiConfig(parentScreen, ConfigElement.from(ColoredShulkersCfg.class).getChildElements(), modid, false, false, title) {
+        return new GuiConfig(parentScreen, modid, title) {
             @Override
             public void initGui() {
                 if(entryList == null || needsRefresh) {
