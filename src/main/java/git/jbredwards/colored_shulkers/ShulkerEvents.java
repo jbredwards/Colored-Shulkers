@@ -99,7 +99,7 @@ final class ShulkerEvents
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGH)
     static void shulkerDying(@Nonnull final PlayerInteractEvent.EntityInteract event) {
         if(event.getTarget() instanceof EntityShulker && ShulkerDying.attemptDye(ShulkerDyeableHolder.entity((EntityShulker)event.getTarget()), event.getEntityPlayer(), event.getHand(), false)) {
             event.setCancellationResult(EnumActionResult.SUCCESS);
@@ -115,13 +115,7 @@ final class ShulkerEvents
 
     @SubscribeEvent
     static void shulkerSync(@Nonnull final PlayerEvent.StartTracking event) {
-        if(event.getTarget() instanceof EntityShulker) {
-            @Nonnull final RainbowShulkerBox.Sync message = new RainbowShulkerBox.Sync();
-            message.id = event.getTarget().getEntityId();
-            message.rainbow = ShulkerUtils.isRainbow((EntityShulker)event.getTarget());
-            message.purple = event.getTarget().getEntityData().getBoolean(ShulkerUtils.PURPLE_TAG);
-            if(message.rainbow || message.purple) ColoredShulkers.WRAPPER.sendTo(message, (EntityPlayerMP)event.getEntityPlayer());
-        }
+        if(event.getTarget() instanceof EntityShulker) ColoredShulkers.WRAPPER.sendTo(new RainbowShulkerBox.Sync((EntityShulker)event.getTarget()), (EntityPlayerMP)event.getEntityPlayer());
     }
 
     @Nonnull

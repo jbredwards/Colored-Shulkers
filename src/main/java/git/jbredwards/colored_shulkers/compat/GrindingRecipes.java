@@ -81,6 +81,7 @@ public final class GrindingRecipes
     private static final boolean R3 = Loader.isModLoaded("roots");
     private static void registerR3(@Nonnull final EnumDyeColor color, @Nonnull final ItemStack dye) {
         ModRecipes.getMortarRecipeList(color.getName(), dye, new OreIngredient(ShulkerDying.shellFromColor(color))).values().forEach(recipe -> {
+            if(recipe.getResult().getCount() > recipe.getResult().getMaxStackSize()) return;
             recipe.setRegistryName(new ResourceLocation(Tags.MOD_ID, "shell_to_dye/" + recipe.getRegistryName().getPath()));
             ModRecipes.addMortarRecipe(recipe);
         });

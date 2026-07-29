@@ -93,6 +93,7 @@ public interface ShulkerDyeableHolder
 
             @Override
             public void setColor(@Nullable final EnumDyeColor color) {
+                if(shulker.world.isRemote) return;
                 ShulkerUtils.setColor(shulker, color);
                 postSet();
             }
@@ -104,6 +105,7 @@ public interface ShulkerDyeableHolder
 
             @Override
             public void setRainbow() {
+                if(shulker.world.isRemote) return;
                 ShulkerUtils.setRainbow(shulker);
                 postSet();
             }

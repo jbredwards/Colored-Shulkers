@@ -139,37 +139,54 @@ public final class RainbowShulkerBox
     {
         public int id;
         public boolean rainbow;
-        public boolean purple;
+        public byte color;
+
+        public Sync() {}
+        public Sync(@Nonnull final EntityShulker shulker) {
+            id = shulker.getEntityId();
+            rainbow = ShulkerUtils.isRainbow(shulker);
+
+            if(shulker.getEntityData().getBoolean(ShulkerUtils.PURPLE_TAG)) color = (byte)(EnumDyeColor.PURPLE.getMetadata() + 1);
+            else {
+                final byte vanillaColor = shulker.getDataManager().get(EntityShulker.COLOR);
+                color = vanillaColor == EnumDyeColor.PURPLE.getMetadata() ? (byte)0 : (byte)(vanillaColor + 1);
+            }
+        }
 
         @Override
         public void fromBytes(@Nonnull final ByteBuf buf) {
             id = buf.readInt();
             rainbow = buf.readBoolean();
-            purple = buf.readBoolean();
+            color = buf.readByte();
         }
 
         @Override
         public void toBytes(@Nonnull final ByteBuf buf) {
             buf.writeInt(id);
             buf.writeBoolean(rainbow);
-            buf.writeBoolean(purple);
+            buf.writeByte(color);
         }
 
         @Nullable
         @Override
         public IMessage onMessage(@Nonnull final Sync message, @Nonnull final MessageContext ctx) {
-            if(ctx.side.isClient()) Minecraft.getMinecraft().addScheduledTask(() -> {
+            if(ctx.side.isClient()) onMessage(message);
+            return null;
+        }
+
+        @SideOnly(Side.CLIENT)
+        private static void onMessage(@Nonnull final Sync message) {
+            Minecraft.getMinecraft().addScheduledTask(() -> {
                 @Nullable final World world = Minecraft.getMinecraft().world;
                 if(world != null) {
                     @Nullable final Entity entity = world.getEntityByID(message.id);
                     if(entity instanceof EntityShulker) {
-                        if(message.rainbow) ShulkerUtils.setRainbow((EntityShulker)entity);
-                        else if(message.purple) ShulkerUtils.setColor((EntityShulker)entity, EnumDyeColor.PURPLE);
+                        @Nonnull final EntityShulker shulker = (EntityShulker)entity;
+                        if(message.rainbow) ShulkerUtils.setRainbow(shulker);
+                        else ShulkerUtils.setColor(shulker, message.color == 0 ? null : EnumDyeColor.byMetadata(message.color - 1));
                     }
                 }
             });
-
-            return null;
         }
     }
 }

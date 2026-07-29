@@ -3,12 +3,15 @@ package git.jbredwards.colored_shulkers;
 import com.google.common.collect.BiMap;
 import git.jbredwards.colored_shulkers.config.ColoredShulkersCfg;
 import git.jbredwards.colored_shulkers.registry.ItemColoredShell;
+import git.jbredwards.colored_shulkers.registry.RainbowShulkerBox;
 import net.minecraft.block.Block;
 import net.minecraft.entity.monster.EntityShulker;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.WeightedRandom;
+import net.minecraft.world.WorldServer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -59,15 +62,32 @@ public interface ShulkerUtils
     }
 
     static void setColor(@Nonnull final EntityShulker shulker, @Nullable final EnumDyeColor color) {
+        boolean dirty = false;
+
+        if(shulker.getEntityData().getBoolean(RAINBOW_TAG)) {
+            shulker.getEntityData().setBoolean(RAINBOW_TAG, false);
+            dirty = true;
+        }
         if(color == EnumDyeColor.PURPLE) {
             shulker.getDataManager().set(EntityShulker.COLOR, (byte)EnumDyeColor.WHITE.getMetadata());
-            shulker.getEntityData().setBoolean(PURPLE_TAG, true);
+            if(!shulker.getEntityData().getBoolean(PURPLE_TAG)) {
+                shulker.getEntityData().setBoolean(PURPLE_TAG, true);
+                dirty = true;
+            }
         }
         else {
             shulker.getDataManager().set(EntityShulker.COLOR, (byte)(color != null ? color : EnumDyeColor.PURPLE).getMetadata());
-            shulker.getEntityData().setBoolean(PURPLE_TAG, false);
+            if(shulker.getEntityData().getBoolean(PURPLE_TAG)) {
+                shulker.getEntityData().setBoolean(PURPLE_TAG, false);
+                dirty = true;
+            }
         }
-        shulker.getEntityData().setBoolean(RAINBOW_TAG, false);
+
+        if(dirty && shulker.world instanceof WorldServer) {
+            @Nonnull final RainbowShulkerBox.Sync message = new RainbowShulkerBox.Sync(shulker);
+            ((WorldServer)shulker.world).getEntityTracker().getTrackingPlayers(shulker).forEach(
+                    player -> ColoredShulkers.WRAPPER.sendTo(message, (EntityPlayerMP)player));
+        }
     }
 
     static boolean isRainbow(@Nonnull final EntityShulker shulker) {
@@ -75,9 +95,23 @@ public interface ShulkerUtils
     }
 
     static void setRainbow(@Nonnull final EntityShulker shulker) {
+        boolean dirty = false;
         shulker.getDataManager().set(EntityShulker.COLOR, (byte)0);
-        shulker.getEntityData().setBoolean(PURPLE_TAG, false);
-        shulker.getEntityData().setBoolean(RAINBOW_TAG, true);
+
+        if(shulker.getEntityData().getBoolean(PURPLE_TAG)) {
+            shulker.getEntityData().setBoolean(PURPLE_TAG, false);
+            dirty = true;
+        }
+        if(!shulker.getEntityData().getBoolean(RAINBOW_TAG)) {
+            shulker.getEntityData().setBoolean(RAINBOW_TAG, true);
+            dirty = true;
+        }
+        
+        if(dirty && shulker.world instanceof WorldServer) {
+            @Nonnull final RainbowShulkerBox.Sync message = new RainbowShulkerBox.Sync(shulker);
+            ((WorldServer)shulker.world).getEntityTracker().getTrackingPlayers(shulker).forEach(
+                    player -> ColoredShulkers.WRAPPER.sendTo(message, (EntityPlayerMP)player));
+        }
     }
 
     static void setRandomColor(@Nonnull final EntityShulker shulker, @Nonnull final Random rand, @Nonnull final ColoredShulkersCfg.EnableType cfg) {
