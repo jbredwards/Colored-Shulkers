@@ -70,6 +70,13 @@ public final class ColoredShulkersCfg
     @Config.LangKey("cfg." + Tags.MOD_ID + ".shellDyingRecipes")
     public static boolean shellDyingRecipes = true;
 
+    @Config.RangeInt(min = 0, max = 64)
+    @Config.LangKey("cfg." + Tags.MOD_ID + ".shellToDyeBreaking")
+    public static int shellToDyeBreaking = 0;
+
+    @Config.LangKey("cfg." + Tags.MOD_ID + ".shellToDyeBreakingXP")
+    public static int shellToDyeBreakingXP = 0;
+
     @Config.RequiresMcRestart
     @Config.RangeInt(min = 0, max = 64)
     @Config.LangKey("cfg." + Tags.MOD_ID + ".shellToDyeRecipes")

@@ -4,6 +4,7 @@ import git.jbredwards.colored_shulkers.ColoredShulkers;
 import git.jbredwards.colored_shulkers.ShulkerUtils;
 import git.jbredwards.colored_shulkers.Tags;
 import git.jbredwards.colored_shulkers.config.ColoredShulkersCfg;
+import git.jbredwards.colored_shulkers.dying.ShulkerDying;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
@@ -26,6 +27,7 @@ import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,7 +61,7 @@ public class ItemColoredShell extends Item
     @Nonnull
     @Override
     public String getItemStackDisplayName(@Nonnull final ItemStack stack) {
-        @Nullable final String color = stack.getMetadata() == ShulkerUtils.RAINBOW_META ? "rainbow" : byShellDamage(stack.getMetadata()).map(EnumDyeColor::getTranslationKey).orElse(null);
+        @Nullable final String color = stack.getMetadata() == ShulkerUtils.RAINBOW_META ? "rainbow" : ShulkerUtils.colorFromShell(stack).map(EnumDyeColor::getTranslationKey).orElse(null);
         if(color == null || ColoredShulkersCfg.shellColorInTooltip) return super.getItemStackDisplayName(stack);
 
         @Nonnull final String colorKey = getTranslationKey(stack) + '.' + color + ".name";
@@ -73,10 +75,25 @@ public class ItemColoredShell extends Item
     @Override
     public void addInformation(@Nonnull final ItemStack stack, @Nullable final World worldIn, @Nonnull final List<String> tooltip, @Nonnull final ITooltipFlag flagIn) {
         if(stack.getMetadata() == ShulkerUtils.RAINBOW_META) {
-            if(ColoredShulkersCfg.rainbowShellBreaking) tooltip.add(I18n.translateToLocal("tooltip." + Tags.MOD_ID + ".rainbow_shulker_shell." + (GuiScreen.isShiftKeyDown() ? ColoredShulkersCfg.rainbowShellXP > 0 ? "shownXp" : "shown" : "hidden")));
+            if(ColoredShulkersCfg.rainbowShellBreaking) {
+                if(!GuiScreen.isShiftKeyDown()) tooltip.add(I18n.translateToLocal("tooltip." + Tags.MOD_ID + ".hidden"));
+                else tooltip.add(I18n.translateToLocal("tooltip." + Tags.MOD_ID + ".rainbow_shulker_shell." + (ColoredShulkersCfg.rainbowShellXP > 0 ? "shownXp" : "shown")));
+            }
+
             if(ColoredShulkersCfg.shellColorInTooltip) tooltip.add(rainbowFormat[RainbowShulkerBox.getTicks(0.00075) % rainbowFormat.length] + localizeColor("rainbow"));
         }
-        else if(ColoredShulkersCfg.shellColorInTooltip) ShulkerUtils.colorFromShell(stack).ifPresent(color -> tooltip.add(localizeColor(color.getTranslationKey())));
+        else ShulkerUtils.colorFromShell(stack).ifPresent(color -> {
+            if(ColoredShulkersCfg.shellToDyeBreaking > 0) {
+                @Nullable final ItemStack dye = ShulkerDying.SHELL_TO_DYE.get(color);
+                if(dye != null && !dye.isEmpty()) {
+                    if(!GuiScreen.isShiftKeyDown()) tooltip.add(I18n.translateToLocal("tooltip." + Tags.MOD_ID + ".hidden"));
+                    else tooltip.add(I18n.translateToLocalFormatted("tooltip." + Tags.MOD_ID + ".colored_shulker_shell." + (ColoredShulkersCfg.shellToDyeBreakingXP > 0 ? "shownXp" : "shown"),
+                            ColoredShulkersCfg.shellToDyeBreaking, dye.getTextComponent().getFormattedText()));
+                }
+            }
+
+            if(ColoredShulkersCfg.shellColorInTooltip) tooltip.add(localizeColor(color.getTranslationKey()));
+        });
     }
 
     @Nonnull
@@ -88,31 +105,60 @@ public class ItemColoredShell extends Item
     @Nonnull
     @Override
     public ActionResult<ItemStack> onItemRightClick(@Nonnull final World worldIn, @Nonnull final EntityPlayer playerIn, @Nonnull final EnumHand handIn) {
-        if(ColoredShulkersCfg.rainbowShellBreaking) {
-            @Nonnull final ItemStack held = playerIn.getHeldItem(handIn);
-            if(!held.isEmpty() && held.getMetadata() == ShulkerUtils.RAINBOW_META) {
-                if(worldIn instanceof WorldServer) {
-                    final int consumed = playerIn.isSneaking() ? Math.min(16, held.getCount()) : 1;
-                    worldIn.getLootTableManager().getLootTableFromLocation(ColoredShulkers.RAINBOW_SHELL_TABLE).generateLootForPools(worldIn.rand,
-                    new LootContext.Builder((WorldServer)worldIn).withPlayer(playerIn).withLuck(consumed - 1).build()).forEach(shell -> {
-                        if(playerIn instanceof FakePlayer) ItemHandlerHelper.giveItemToPlayer(playerIn, shell);
-                        else playerIn.dropItem(shell, false, false);
-                    });
+        @Nonnull final ItemStack held = playerIn.getHeldItem(handIn);
+        if(!held.isEmpty()) {
+            // Rainbow shell breaking.
+            if(held.getMetadata() == ShulkerUtils.RAINBOW_META) {
+                if(ColoredShulkersCfg.rainbowShellBreaking) {
+                    if(worldIn instanceof WorldServer) {
+                        final int consumed = playerIn.isSneaking() ? Math.min(16, held.getCount()) : 1;
+                        drop(worldIn, playerIn, ColoredShulkersCfg.rainbowShellXP * consumed, worldIn.getLootTableManager().getLootTableFromLocation(ColoredShulkers.RAINBOW_SHELL_TABLE)
+                                .generateLootForPools(worldIn.rand, new LootContext.Builder((WorldServer)worldIn).withPlayer(playerIn).withLuck(consumed - 1).build()));
 
-                    if(!(playerIn instanceof FakePlayer)) for(int i = ColoredShulkersCfg.rainbowShellXP * consumed; i > 0;) {
-                        final int split = EntityXPOrb.getXPSplit(i);
-                        worldIn.spawnEntity(new EntityXPOrb(worldIn, playerIn.posX, playerIn.posY + playerIn.getEyeHeight(), playerIn.posZ, split));
-                        i -= split;
+                        worldIn.playSound(null, playerIn.posX, playerIn.posY, playerIn.posZ, ColoredShulkers.RAINBOW_SHELL_USE, playerIn.getSoundCategory(), 1, 1);
+                        held.shrink(consumed);
                     }
 
-                    worldIn.playSound(null, playerIn.posX, playerIn.posY, playerIn.posZ, ColoredShulkers.RAINBOW_SHELL_USE, playerIn.getSoundCategory(), 1, 1);
-                    held.shrink(consumed);
+                    return ActionResult.newResult(EnumActionResult.SUCCESS, held);
                 }
+            }
+            // Colored shell breaking.
+            else if(ColoredShulkersCfg.shellToDyeBreaking > 0) {
+                @Nonnull final Optional<EnumDyeColor> color = ShulkerUtils.colorFromShell(held);
+                if(color.isPresent()) {
+                    @Nullable final ItemStack dye = ShulkerDying.SHELL_TO_DYE.get(color.get());
+                    if(dye != null && !dye.isEmpty()) {
+                        if(!worldIn.isRemote) {
+                            final int consumed = playerIn.isSneaking() ? Math.min(16, held.getCount()) : 1;
 
-                return ActionResult.newResult(EnumActionResult.SUCCESS, held);
+                            @Nonnull final ItemStack stack = ItemHandlerHelper.copyStackWithSize(dye, ColoredShulkersCfg.shellToDyeBreaking * consumed);
+                            @Nonnull final List<ItemStack> stacks = new ArrayList<>();
+                            while(!stack.isEmpty()) stacks.add(stack.splitStack(stack.getMaxStackSize()));
+
+                            drop(worldIn, playerIn, ColoredShulkersCfg.shellToDyeBreakingXP * consumed, stacks);
+                            worldIn.playSound(null, playerIn.posX, playerIn.posY, playerIn.posZ, ColoredShulkers.RAINBOW_SHELL_USE, playerIn.getSoundCategory(), 1, 1);
+                            held.shrink(consumed);
+                        }
+
+                        return ActionResult.newResult(EnumActionResult.SUCCESS, held);
+                    }
+                }
             }
         }
 
         return super.onItemRightClick(worldIn, playerIn, handIn);
+    }
+
+    private static void drop(@Nonnull final World worldIn, @Nonnull final EntityPlayer playerIn, final int xp, @Nonnull final Iterable<ItemStack> loot) {
+        for(@Nonnull final ItemStack shell : loot) {
+            if(playerIn instanceof FakePlayer) ItemHandlerHelper.giveItemToPlayer(playerIn, shell);
+            else playerIn.dropItem(shell, false, false);
+        }
+
+        if(!(playerIn instanceof FakePlayer)) for(int i = xp; i > 0;) {
+            final int split = EntityXPOrb.getXPSplit(i);
+            worldIn.spawnEntity(new EntityXPOrb(worldIn, playerIn.posX, playerIn.posY + playerIn.getEyeHeight(), playerIn.posZ, split));
+            i -= split;
+        }
     }
 }

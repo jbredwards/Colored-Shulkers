@@ -31,11 +31,7 @@ import javax.annotation.Nonnull;
  */
 public final class GrindingRecipes
 {
-    public static void registerAll() {
-        if(ColoredShulkersCfg.shellToDyeRecipes > 0) ShulkerDying.SHELL_TO_DYE.forEach(GrindingRecipes::register);
-    }
-
-    private static void register(@Nonnull final EnumDyeColor color, @Nonnull final ItemStack dye) {
+    public static void register(@Nonnull final EnumDyeColor color, @Nonnull final ItemStack dye) {
         if(AA) registerAA(color, ItemHandlerHelper.copyStackWithSize(dye, ColoredShulkersCfg.shellToDyeRecipes));
         if(AE) registerAE(color, ItemHandlerHelper.copyStackWithSize(dye, ColoredShulkersCfg.shellToDyeRecipes));
         if(IC) registerIC(color, ItemHandlerHelper.copyStackWithSize(dye, ColoredShulkersCfg.shellToDyeRecipes));
