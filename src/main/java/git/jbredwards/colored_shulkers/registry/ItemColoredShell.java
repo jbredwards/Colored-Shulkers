@@ -124,24 +124,21 @@ public class ItemColoredShell extends Item
             }
             // Colored shell breaking.
             else if(ColoredShulkersCfg.shellToDyeBreaking > 0) {
-                @Nonnull final Optional<EnumDyeColor> color = ShulkerUtils.colorFromShell(held);
-                if(color.isPresent()) {
-                    @Nullable final ItemStack dye = ShulkerDying.SHELL_TO_DYE.get(color.get());
-                    if(dye != null && !dye.isEmpty()) {
-                        if(!worldIn.isRemote) {
-                            final int consumed = playerIn.isSneaking() ? Math.min(16, held.getCount()) : 1;
+                @Nullable final ItemStack dye = ShulkerUtils.colorFromShell(held).map(ShulkerDying.SHELL_TO_DYE::get).orElse(null);
+                if(dye != null && !dye.isEmpty()) {
+                    if(!worldIn.isRemote) {
+                        final int consumed = playerIn.isSneaking() ? Math.min(16, held.getCount()) : 1;
 
-                            @Nonnull final ItemStack stack = ItemHandlerHelper.copyStackWithSize(dye, ColoredShulkersCfg.shellToDyeBreaking * consumed);
-                            @Nonnull final List<ItemStack> stacks = new ArrayList<>();
-                            while(!stack.isEmpty()) stacks.add(stack.splitStack(stack.getMaxStackSize()));
+                        @Nonnull final ItemStack stack = ItemHandlerHelper.copyStackWithSize(dye, ColoredShulkersCfg.shellToDyeBreaking * consumed);
+                        @Nonnull final List<ItemStack> stacks = new ArrayList<>();
+                        while(!stack.isEmpty()) stacks.add(stack.splitStack(stack.getMaxStackSize()));
 
-                            drop(worldIn, playerIn, ColoredShulkersCfg.shellToDyeBreakingXP * consumed, stacks);
-                            worldIn.playSound(null, playerIn.posX, playerIn.posY, playerIn.posZ, ColoredShulkers.RAINBOW_SHELL_USE, playerIn.getSoundCategory(), 1, 1);
-                            held.shrink(consumed);
-                        }
-
-                        return ActionResult.newResult(EnumActionResult.SUCCESS, held);
+                        drop(worldIn, playerIn, ColoredShulkersCfg.shellToDyeBreakingXP * consumed, stacks);
+                        worldIn.playSound(null, playerIn.posX, playerIn.posY, playerIn.posZ, ColoredShulkers.COLORED_SHELL_USE, playerIn.getSoundCategory(), 1, 1);
+                        held.shrink(consumed);
                     }
+
+                    return ActionResult.newResult(EnumActionResult.SUCCESS, held);
                 }
             }
         }

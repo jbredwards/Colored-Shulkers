@@ -1,11 +1,20 @@
 {
-  "item.rainbow_shell.use": {
-    "subtitle": "subtitle.colored_shulkers.item.rainbow_shell.use",
+  "item.colored_shell.use": {
+    "subtitle": "subtitle.colored_shulkers.item.colored_shell.use",
     "sounds": [
       {
         "type": "event",
         "name": "entity.shulker.open",
         "pitch": 2
+      }
+    ]
+  },
+  "item.rainbow_shell.use": {
+    "subtitle": "subtitle.colored_shulkers.item.rainbow_shell.use",
+    "sounds": [
+      {
+        "type": "event",
+        "name": "colored_shulkers:item.colored_shell.use"
       }
     ]
   },

@@ -83,6 +83,7 @@ final class RegistryHandler
             @Nullable final Item pestleAndMortar = Item.getByNameOrId("botania:pestleandmortar");
             @Nonnull final Ingredient bowl = pestleAndMortar != null ? Ingredient.fromItems(pestleAndMortar, Items.BOWL) : Ingredient.fromItem(Items.BOWL);
             ShulkerDying.SHELL_TO_DYE.forEach((color, dye) -> {
+                if(dye == null || dye.isEmpty()) return; // Should never pass, but let's be safe.
                 GrindingRecipes.register(color, dye);
                 event.getRegistry().register(new ShapelessOreRecipe(null,
                 ItemHandlerHelper.copyStackWithSize(dye, Math.min(64, ColoredShulkersCfg.shellToDyeRecipes)), bowl, ShulkerDying.shellFromColor(color)) {
@@ -142,7 +143,8 @@ final class RegistryHandler
 
     @SubscribeEvent
     static void registerSounds(@Nonnull final RegistryEvent.Register<SoundEvent> event) {
-        event.getRegistry().registerAll(ColoredShulkers.RAINBOW_SHELL_USE = new SoundEvent(new ResourceLocation(Tags.MOD_ID, "item.rainbow_shell.use")).setRegistryName("item.rainbow_shell.use"),
+        event.getRegistry().registerAll(ColoredShulkers.COLORED_SHELL_USE = new SoundEvent(new ResourceLocation(Tags.MOD_ID, "item.colored_shell.use")).setRegistryName("item.colored_shell.use"),
+                                        ColoredShulkers.RAINBOW_SHELL_USE = new SoundEvent(new ResourceLocation(Tags.MOD_ID, "item.rainbow_shell.use")).setRegistryName("item.rainbow_shell.use"),
                                         ColoredShulkers.SHULKER_DYED = new SoundEvent(new ResourceLocation(Tags.MOD_ID, "entity.shulker.dyed")).setRegistryName("entity.shulker.dyed"),
                                         ColoredShulkers.SHULKER_ENCHANT = new SoundEvent(new ResourceLocation(Tags.MOD_ID, "entity.shulker.enchant")).setRegistryName("entity.shulker.enchant"),
                                         ColoredShulkers.SHULKER_WASH = new SoundEvent(new ResourceLocation(Tags.MOD_ID, "entity.shulker.wash")).setRegistryName("entity.shulker.wash"));
