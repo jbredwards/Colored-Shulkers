@@ -43,6 +43,7 @@ public interface ShulkerDyeableAction
         else ShulkerDying.shrinkAndGive(player, hand, stack, stack.getItem().getContainerItem(stack));
     }
 
+    default void playFX(@Nonnull final EntityPlayer player, @Nonnull final AxisAlignedBB box) { playFX(player.world, box); }
     default void playFX(@Nonnull final World world, @Nonnull final AxisAlignedBB box) {
         if(ColoredShulkersCfg.inWorldDyingFX) {
             final double x = box.minX + (box.maxX - box.minX) / 2;

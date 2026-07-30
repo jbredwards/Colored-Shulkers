@@ -43,6 +43,7 @@ dependencies {
     compileOnly rfg.deobf('curse.maven:extrautils2-225561:2678374')
     compileOnly rfg.deobf('curse.maven:immersive-engineering-231951:2974106')
     compileOnly rfg.deobf('curse.maven:industrialcraft-242638:3838713')
+    compileOnly rfg.deobf('curse.maven:industrialcraft-classic-242942:8153677')
     compileOnly rfg.deobf('curse.maven:mekanism-268560:2835175')
     compileOnly rfg.deobf('curse.maven:nuclearcraft-226254:8213196')
     compileOnly rfg.deobf('curse.maven:roots-246183:5193525')

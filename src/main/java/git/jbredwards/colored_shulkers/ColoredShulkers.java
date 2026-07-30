@@ -1,5 +1,6 @@
 package git.jbredwards.colored_shulkers;
 
+import git.jbredwards.colored_shulkers.compat.IC2Handler;
 import git.jbredwards.colored_shulkers.compat.JERHandler;
 import git.jbredwards.colored_shulkers.compat.ShulkerBaublesHandler;
 import git.jbredwards.colored_shulkers.compat.ShulkerDropsTwoHandler;
@@ -66,6 +67,7 @@ public final class ColoredShulkers
 
     @Mod.EventHandler
     static void init(@Nonnull final FMLInitializationEvent event) {
+        if(Loader.isModLoaded("ic2")) IC2Handler.init();
         if(Loader.isModLoaded("shulkerdropstwo")) ShulkerDropsTwoHandler.init();
         ShulkerDyeableAction.SHELL_COLOR_GETTER.put(Items.POTIONITEM, stack -> PotionUtils.getPotionFromItem(stack) == PotionTypes.WATER ? ShulkerDyeableAction.washing() : null);
         ShulkerDyeableAction.SHELL_COLOR_GETTER.put(Items.SHULKER_SHELL, stack -> ShulkerDyeableAction.color(null));

@@ -81,7 +81,7 @@ public final class ShulkerDying
                 shellColor.apply(holder);
 
                 player.swingArm(hand);
-                shellColor.playFX(player.world, holder.getBoundingBox());
+                shellColor.playFX(player, holder.getBoundingBox());
             }
 
             return true;

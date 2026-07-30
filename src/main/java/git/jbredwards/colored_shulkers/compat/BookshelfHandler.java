@@ -16,7 +16,7 @@ import javax.annotation.Nonnull;
  * @author jbred
  *
  */
-public class BookshelfHandler
+public final class BookshelfHandler
 {
     public static void registerOres() {
         if(BookshelfConfig.oreDictShulker) {
