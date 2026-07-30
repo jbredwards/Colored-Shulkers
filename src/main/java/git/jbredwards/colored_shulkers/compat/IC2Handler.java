@@ -17,7 +17,9 @@ import net.minecraft.util.math.AxisAlignedBB;
 import org.apache.logging.log4j.util.TriConsumer;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.Method;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -47,7 +49,7 @@ public final class IC2Handler
         }
         // IC2:
         catch(@Nonnull final Throwable t) {
-            colorFunc = stack -> ((ItemToolPainter)stack.getItem()).getColor(stack).mcColor;
+            colorFunc = stack -> Optional.ofNullable(((ItemToolPainter)stack.getItem()).getColor(stack)).map(c -> c.mcColor).orElse(null);
             damageFunc = (stack, player, hand) -> ((ItemToolPainter)stack.getItem()).damagePainter(player, hand, ((ItemToolPainter)stack.getItem()).getColor(stack));
             soundFunc = player -> IC2.audioManager.playOnce(player, PositionSpec.Hand, "Tools/Painter.ogg", true, IC2.audioManager.getDefaultVolume());
         }
@@ -59,8 +61,8 @@ public final class IC2Handler
 
     public static void init() {
         ShulkerDyeableAction.SHELL_COLOR_GETTER.put(MoreObjects.firstNonNull(Item.getByNameOrId("ic2:itempainters"), Item.getByNameOrId("ic2:painter")), stack -> {
-            @Nonnull final EnumDyeColor color = colorManager.apply(stack);
-            return new ShulkerDyeableAction() {
+            @Nullable final EnumDyeColor color = colorManager.apply(stack);
+            return color == null ? null : new ShulkerDyeableAction() {
                 @Override
                 public void performShrink(@Nonnull final ItemStack stack, @Nonnull final EntityPlayer player, @Nonnull final EnumHand hand) {
                     damageManager.accept(stack, player, hand);
