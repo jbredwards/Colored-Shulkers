@@ -4,6 +4,8 @@ import git.jbredwards.colored_shulkers.ColoredShulkers;
 import git.jbredwards.colored_shulkers.ShulkerUtils;
 import git.jbredwards.colored_shulkers.Tags;
 import git.jbredwards.colored_shulkers.config.ColoredShulkersCfg;
+import git.jbredwards.colored_shulkers.dying.ShulkerDyeableAction;
+import git.jbredwards.colored_shulkers.dying.ShulkerDyeableHolder;
 import git.jbredwards.colored_shulkers.registry.RainbowShulkerBox;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.GlStateManager;
@@ -12,7 +14,9 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.launchwrapper.IClassTransformer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import org.objectweb.asm.ClassReader;
@@ -71,6 +75,17 @@ public final class ASMHandler implements IFMLLoadingPlugin
                 }
 
                 return false;
+            }).andThen(classNode -> {
+                classNode.methods.removeIf(method -> method.name.equals("recolorBlock"));
+
+                @Nonnull final MethodNode recolorBlock = new MethodNode(Opcodes.ACC_PUBLIC, "recolorBlock", "(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/EnumFacing;Lnet/minecraft/item/EnumDyeColor;)Z", null, null);
+                recolorBlock.visitVarInsn(Opcodes.ALOAD, 1);
+                recolorBlock.visitVarInsn(Opcodes.ALOAD, 2);
+                recolorBlock.visitVarInsn(Opcodes.ALOAD, 4);
+                recolorBlock.visitMethodInsn(Opcodes.INVOKESTATIC, "git/jbredwards/colored_shulkers/asm/ASMHandler$Hooks", "recolorBlock", "(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/item/EnumDyeColor;)Z", false);
+                recolorBlock.visitInsn(Opcodes.IRETURN);
+
+                classNode.methods.add(recolorBlock);
             }));
         }
 
@@ -90,6 +105,8 @@ public final class ASMHandler implements IFMLLoadingPlugin
         @Nonnull
         private static byte[] transformRenderShulker(@Nonnull final byte[] basicClass) {
             return transformClass(basicClass, classNode -> {
+                classNode.methods.removeIf(method -> method.name.equals(FMLLaunchHandler.isDeobfuscatedEnvironment() ? "renderModel" : "func_77036_a"));
+
                 @Nonnull final MethodNode generic = new MethodNode(Opcodes.ACC_PROTECTED | Opcodes.ACC_BRIDGE | Opcodes.ACC_SYNTHETIC, FMLLaunchHandler.isDeobfuscatedEnvironment() ? "renderModel" : "func_77036_a", "(Lnet/minecraft/entity/EntityLivingBase;FFFFFF)V", null, null);
                 generic.visitVarInsn(Opcodes.ALOAD, 0);
                 generic.visitVarInsn(Opcodes.ALOAD, 1);
@@ -237,6 +254,18 @@ public final class ASMHandler implements IFMLLoadingPlugin
         public static Block getPurpleShulkerBox(@Nonnull final Block oldBox) {
             if(ColoredShulkers.PURPLE_SHULKER_BOX != null) return ColoredShulkers.PURPLE_SHULKER_BOX;
             else return ColoredShulkers.PURPLE_SHULKER_BOX = RainbowShulkerBox.Tile.asBlock();
+        }
+
+        public static boolean recolorBlock(@Nonnull final World world, @Nonnull final BlockPos pos, @Nonnull final EnumDyeColor color) {
+            if(!ColoredShulkersCfg.inWorldDying) return false;
+
+            @Nonnull final ShulkerDyeableHolder shulker = ShulkerDyeableHolder.block(world, pos, world.getBlockState(pos));
+            @Nonnull final ShulkerDyeableAction runnable = ShulkerDyeableAction.color(color);
+            if(!runnable.canApply(shulker)) return false;
+
+            runnable.apply(shulker);
+            runnable.playFX(world, shulker.getBoundingBox());
+            return true;
         }
     }
 
