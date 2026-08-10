@@ -6,12 +6,10 @@ import git.jbredwards.colored_shulkers.registry.ItemColoredShell;
 import git.jbredwards.colored_shulkers.registry.RainbowShulkerBox;
 import net.minecraft.block.Block;
 import net.minecraft.entity.monster.EntityShulker;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.WeightedRandom;
-import net.minecraft.world.WorldServer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -83,11 +81,7 @@ public interface ShulkerUtils
             }
         }
 
-        if(dirty && shulker.world instanceof WorldServer) {
-            @Nonnull final RainbowShulkerBox.Sync message = new RainbowShulkerBox.Sync(shulker);
-            ((WorldServer)shulker.world).getEntityTracker().getTrackingPlayers(shulker).forEach(
-                    player -> ColoredShulkers.WRAPPER.sendTo(message, (EntityPlayerMP)player));
-        }
+        if(dirty && !shulker.world.isRemote) ColoredShulkers.WRAPPER.sendToAllTracking(new RainbowShulkerBox.Sync(shulker), shulker);
     }
 
     static boolean isRainbow(@Nonnull final EntityShulker shulker) {
@@ -106,12 +100,8 @@ public interface ShulkerUtils
             shulker.getEntityData().setBoolean(RAINBOW_TAG, true);
             dirty = true;
         }
-        
-        if(dirty && shulker.world instanceof WorldServer) {
-            @Nonnull final RainbowShulkerBox.Sync message = new RainbowShulkerBox.Sync(shulker);
-            ((WorldServer)shulker.world).getEntityTracker().getTrackingPlayers(shulker).forEach(
-                    player -> ColoredShulkers.WRAPPER.sendTo(message, (EntityPlayerMP)player));
-        }
+
+        if(dirty && !shulker.world.isRemote) ColoredShulkers.WRAPPER.sendToAllTracking(new RainbowShulkerBox.Sync(shulker), shulker);
     }
 
     static void setRandomColor(@Nonnull final EntityShulker shulker, @Nonnull final Random rand, @Nonnull final ColoredShulkersCfg.EnableType cfg) {

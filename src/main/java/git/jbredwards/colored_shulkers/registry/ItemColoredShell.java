@@ -88,7 +88,7 @@ public class ItemColoredShell extends Item
                 if(dye != null && !dye.isEmpty()) {
                     if(!GuiScreen.isShiftKeyDown()) tooltip.add(I18n.translateToLocal("tooltip." + Tags.MOD_ID + ".hidden"));
                     else tooltip.add(I18n.translateToLocalFormatted("tooltip." + Tags.MOD_ID + ".colored_shulker_shell." + (ColoredShulkersCfg.shellToDyeBreakingXP > 0 ? "shownXp" : "shown"),
-                            ColoredShulkersCfg.shellToDyeBreaking, dye.getTextComponent().getFormattedText()));
+                            ColoredShulkersCfg.shellToDyeBreaking, dye.getTextComponent().getUnformattedText().trim()));
                 }
             }
 
