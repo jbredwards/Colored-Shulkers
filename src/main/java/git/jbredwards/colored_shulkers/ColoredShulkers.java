@@ -36,6 +36,7 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
@@ -77,6 +78,7 @@ public final class ColoredShulkers
         });
     }
 
+    @SideOnly(Side.CLIENT)
     @Mod.EventHandler
     static void initClient(@Nonnull final FMLInitializationEvent event) {
         Item.getItemFromBlock(PURPLE_SHULKER_BOX).setTileEntityItemStackRenderer(new RainbowShulkerBox.TEISR(false));
