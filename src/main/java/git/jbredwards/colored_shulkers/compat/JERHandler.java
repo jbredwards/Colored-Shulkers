@@ -6,7 +6,6 @@ import git.jbredwards.colored_shulkers.config.ColoredShulkersCfg;
 import git.jbredwards.colored_shulkers.registry.ItemColoredShell;
 import io.netty.util.internal.IntegerHolder;
 import jeresources.api.drop.LootDrop;
-import jeresources.compatibility.CompatBase;
 import jeresources.compatibility.JERAPI;
 import jeresources.util.LootTableHelper;
 import net.minecraft.entity.monster.EntityShulker;
@@ -27,7 +26,7 @@ public final class JERHandler
     public static void postInit() {
         @Nonnull final LootTable defaultLootTable = LootTableHelper.getManager().getLootTableFromLocation(LootTableList.ENTITIES_SHULKER);
         for(@Nonnull final IntegerHolder meta = new IntegerHolder(); meta.value <= ShulkerUtils.RAINBOW_META; meta.value++) {
-            @Nonnull final EntityShulker shulker = new EntityShulker(CompatBase.getWorld());
+            @Nonnull final EntityShulker shulker = new EntityShulker(JERAPI.getInstance().getWorld());
 
             if(meta.value == ShulkerUtils.RAINBOW_META) ShulkerUtils.setRainbow(shulker);
             else ShulkerUtils.setColor(shulker, ItemColoredShell.byShellDamage(meta.value).orElseThrow(IllegalStateException::new));
