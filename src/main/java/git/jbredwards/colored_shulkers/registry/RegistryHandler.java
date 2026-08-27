@@ -220,13 +220,13 @@ final class RegistryHandler
             Optional.ofNullable(Item.getByNameOrId("actuallyadditions:item_misc")).ifPresent(item ->
                 ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLACK, new ItemStack(item, 1, 17))
             );
-            // Shells to dyes (XU).
-            Optional.ofNullable(Item.getByNameOrId("extrautils2:ingredients")).ifPresent(item ->
-                ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLUE, new ItemStack(item, 1, 14))
-            );
             // Shells to dyes (Natura).
             Optional.ofNullable(Item.getByNameOrId("natura:materials")).ifPresent(item ->
                 ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLUE, new ItemStack(item, 1, 8))
+            );
+            // Shells to dyes (XU).
+            Optional.ofNullable(Item.getByNameOrId("extrautils2:ingredients")).ifPresent(item ->
+                ShulkerDying.SHELL_TO_DYE.putIfAbsent(EnumDyeColor.BLUE, new ItemStack(item, 1, 14))
             );
         }
     }

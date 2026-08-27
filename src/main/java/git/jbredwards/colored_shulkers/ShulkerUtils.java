@@ -107,7 +107,7 @@ public interface ShulkerUtils
     static void setRandomColor(@Nonnull final EntityShulker shulker, @Nonnull final Random rand, @Nonnull final ColoredShulkersCfg.EnableType cfg) {
         if(cfg != ColoredShulkersCfg.EnableType.DISABLED) {
             if(cfg == ColoredShulkersCfg.EnableType.ENABLED && rand.nextDouble() < ColoredShulkersCfg.shulkerChanceRainbow) setRainbow(shulker);
-            else setColor(shulker, WeightedRandom.getRandomItem(rand, ColoredShulkersCfg.WEIGHTS).color);
+            else setColor(shulker, WeightedRandom.getRandomItem(rand, ColoredShulkersCfg.WEIGHTS, ColoredShulkersCfg.TOTAL_WEIGHT).color);
         }
     }
 }

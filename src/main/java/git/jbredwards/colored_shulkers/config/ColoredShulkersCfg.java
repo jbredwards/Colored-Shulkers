@@ -137,6 +137,9 @@ public final class ColoredShulkersCfg
     @Config.LangKey("cfg." + Tags.MOD_ID + ".shulkerWeightBrown")
     public static int shulkerWeightBrown = 1;
 
+    @Config.Ignore
+    public static int TOTAL_WEIGHT = 0;
+
     @Nonnull
     @Config.Ignore
     public static final List<ColorEntry> WEIGHTS = new ArrayList<>();
@@ -169,5 +172,6 @@ public final class ColoredShulkersCfg
         if(shulkerWeightGray > 0) WEIGHTS.add(new ColorEntry(EnumDyeColor.GRAY, shulkerWeightGray));
         if(shulkerWeightBlack > 0) WEIGHTS.add(new ColorEntry(EnumDyeColor.BLACK, shulkerWeightBlack));
         if(shulkerWeightBrown > 0) WEIGHTS.add(new ColorEntry(EnumDyeColor.BROWN, shulkerWeightBrown));
+        TOTAL_WEIGHT = WeightedRandom.getTotalWeight(WEIGHTS);
     }
 }
