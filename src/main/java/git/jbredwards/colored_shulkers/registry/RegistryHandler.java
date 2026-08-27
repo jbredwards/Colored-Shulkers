@@ -79,6 +79,7 @@ final class RegistryHandler
     static void registerShellDyeRecipes(@Nonnull final RegistryEvent.Register<IRecipe> event) {
         // Shells to dyes.
         extraShellsToDyes();
+        GrindingRecipes.registerForced();
         if(ColoredShulkersCfg.shellToDyeRecipes > 0) {
             @Nullable final Item pestleAndMortar = Item.getByNameOrId("botania:pestleandmortar");
             @Nonnull final Ingredient bowl = pestleAndMortar != null ? Ingredient.fromItems(pestleAndMortar, Items.BOWL) : Ingredient.fromItem(Items.BOWL);
