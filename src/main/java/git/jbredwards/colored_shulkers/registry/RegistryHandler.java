@@ -1,5 +1,6 @@
 package git.jbredwards.colored_shulkers.registry;
 
+import com.google.common.collect.Lists;
 import git.jbredwards.colored_shulkers.ColoredShulkers;
 import git.jbredwards.colored_shulkers.ShulkerUtils;
 import git.jbredwards.colored_shulkers.Tags;
@@ -29,6 +30,8 @@ import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.crafting.CompoundIngredient;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
@@ -46,6 +49,7 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -81,8 +85,9 @@ final class RegistryHandler
         extraShellsToDyes();
         GrindingRecipes.registerForced();
         if(ColoredShulkersCfg.shellToDyeRecipes > 0) {
-            @Nullable final Item pestleAndMortar = Item.getByNameOrId("botania:pestleandmortar");
-            @Nonnull final Ingredient bowl = pestleAndMortar != null ? Ingredient.fromItems(pestleAndMortar, Items.BOWL) : Ingredient.fromItem(Items.BOWL);
+            @Nonnull final List<Ingredient> bowls = Lists.newArrayList(OreDictionary.doesOreNameExist("bowlWood") ? new OreIngredient("bowlWood") : Ingredient.fromItem(Items.BOWL));
+            if(OreDictionary.doesOreNameExist("pestleAndMortar")) bowls.add(new OreIngredient("pestleAndMortar"));
+            @Nonnull final Ingredient bowl = new CompoundIngredient(bowls) {};
             ShulkerDying.SHELL_TO_DYE.forEach((color, dye) -> {
                 if(dye == null || dye.isEmpty()) return; // Should never pass, but let's be safe.
                 GrindingRecipes.register(color, dye);
@@ -94,7 +99,12 @@ final class RegistryHandler
                         @Nonnull final NonNullList<ItemStack> ret = NonNullList.withSize(inv.getSizeInventory(), ItemStack.EMPTY);
                         for(int i = 0; i < ret.size(); i++) {
                             @Nonnull final ItemStack remaining = inv.getStackInSlot(i);
-                            if(remaining.getItem() != Items.SHULKER_SHELL && remaining.getItem() != ColoredShulkers.SHELL) ret.set(i, ItemHandlerHelper.copyStackWithSize(remaining, 1));
+                            if(!remaining.isEmpty() && remaining.getItem() != Items.SHULKER_SHELL && remaining.getItem() != ColoredShulkers.SHELL) {
+                                @Nonnull final ItemStack copy = ItemHandlerHelper.copyStackWithSize(remaining, 1);
+                                copy.damageItem(1, ForgeHooks.getCraftingPlayer());
+                                if(!copy.isEmpty()) ret.set(i, copy);
+                                break;
+                            }
                         }
 
                         return ret;
