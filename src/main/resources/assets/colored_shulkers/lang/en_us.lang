@@ -99,6 +99,3 @@ tooltip.colored_shulkers.colored_shulker_shell.shownXp=Right-click to shatter in
 tooltip.colored_shulkers.hidden=§7Hold §bSHIFT§7 for more info
 tooltip.colored_shulkers.rainbow_shulker_shell.shown=Right-click to shatter into Shulker Shells
 tooltip.colored_shulkers.rainbow_shulker_shell.shownXp=Right-click to shatter into XP and Shulker Shells
-
-mod.colored_shulkers.credits=\n- jbredwards: creator and maintainer\n- CleanroomMC: created TemplateDevEnv
-mod.colored_shulkers.description=Adds colored shulkers and colored shulker shells!

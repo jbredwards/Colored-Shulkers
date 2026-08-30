@@ -91,7 +91,10 @@ public final class ColoredShulkers
         @Nonnull final ModMetadata metadata = mod.getMetadata();
         @Nonnull final String credits = metadata.credits, description = metadata.description;
         ((IReloadableResourceManager)Minecraft.getMinecraft().getResourceManager()).registerReloadListener((ISelectiveResourceReloadListener)(manager, predicate) -> {
-            if(predicate.test(VanillaResourceType.LANGUAGES)) { metadata.credits = I18n.format(credits).replace("\\n", "\n"); metadata.description = I18n.format(description); }
+            if(predicate.test(VanillaResourceType.LANGUAGES)) {
+                metadata.credits = I18n.hasKey("mod." + Tags.MOD_ID + ".credits") ? I18n.format("mod." + Tags.MOD_ID + ".credits").replace("\\n", "\n") : credits;
+                metadata.description = I18n.hasKey("mod." + Tags.MOD_ID + ".description") ? I18n.format("mod." + Tags.MOD_ID + ".description") : description;
+            }
         });
     }
 
